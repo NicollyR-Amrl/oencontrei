@@ -1,0 +1,64 @@
+# O Encontrei! — Docker Compose
+# Rodar com: docker-compose up --build
+
+version: '3.8'
+
+services:
+  # Banco de Dados PostgreSQL
+  banco:
+    image: postgres:16-alpine
+    container_name: encontrei-banco
+    environment:
+      POSTGRES_USER: encontrei_user
+      POSTGRES_PASSWORD: encontrei_senha
+      POSTGRES_DB: encontrei_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U encontrei_user -d encontrei_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - encontrei-rede
+
+  # Backend — Node.js + Express
+  backend:
+    build: ./backend
+    container_name: encontrei-backend
+    environment:
+      DATABASE_URL: postgresql://encontrei_user:encontrei_senha@banco:5432/encontrei_db?schema=public
+      JWT_SECRET: super-segredo-encontrei-2024-mude-em-producao
+      PORT: 3000
+      NODE_ENV: production
+      FRONTEND_URL: http://localhost:5173
+    ports:
+      - "3000:3000"
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      banco:
+        condition: service_healthy
+    networks:
+      - encontrei-rede
+
+  # Frontend — React + Vite (servido com nginx)
+  frontend:
+    build: ./frontend
+    container_name: encontrei-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - encontrei-rede
+
+volumes:
+  postgres_data:
+  uploads_data:
+
+networks:
+  encontrei-rede:
+    driver: bridge
