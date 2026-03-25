@@ -1,17 +1,133 @@
-datasource db {
-  provider = "postgresql"
-}
+// Schema do Prisma para o sistema "O Encontrei!"
+// Plataforma de recuperação de objetos perdidos em escolas
 
 generator client {
   provider = "prisma-client-js"
 }
 
-model Objeto {
-  id               Int      @id @default(autoincrement())
-  nome             String   @db.VarChar(100)
-  descricao        String?
-  categoria        String?  @db.VarChar(50)
-  foto             String?  @db.VarChar(255)
-  local_encontrado String?  @db.VarChar(100)
-  data_encontrado  DateTime @default(now())
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum TipoItem {
+  PERDIDO
+  ENCONTRADO
+}
+
+enum StatusItem {
+  ATIVO
+  DEVOLVIDO
+  EXPIRADO
+}
+
+enum CategoriaItem {
+  ELETRONICO
+  ROUPA
+  MATERIAL_ESCOLAR
+  ACESSORIO
+  DOCUMENTO
+  CHAVE
+  GARRAFA
+  OUTRO
+}
+
+enum CargoUsuario {
+  ALUNO
+  PROFESSOR
+  FUNCIONARIO
+  ADMIN
+}
+
+// Modelos
+model Usuario {
+  id        String        @id @default(uuid())
+  nome      String
+  email     String        @unique
+  senha     String
+  turma     String?
+  cargo     CargoUsuario  @default(ALUNO)
+  reputacao Int           @default(0)
+  avatar    String?
+  criadoEm  DateTime      @default(now()) @map("criado_em")
+  atualizadoEm DateTime   @updatedAt @map("atualizado_em")
+
+  // Relações
+  itens              Item[]
+  mensagensEnviadas  Mensagem[]    @relation("remetente")
+  mensagensRecebidas Mensagem[]    @relation("destinatario")
+  notificacoes       Notificacao[]
+
+  @@map("usuarios")
+}
+
+model Item {
+  id        String        @id @default(uuid())
+  titulo    String
+  descricao String
+  categoria CategoriaItem
+  tipo      TipoItem
+  local     String
+  imagem    String?
+  status    StatusItem    @default(ATIVO)
+  data      DateTime      @default(now())
+  criadoEm  DateTime      @default(now()) @map("criado_em")
+  atualizadoEm DateTime   @updatedAt @map("atualizado_em")
+
+  // Relações
+  usuarioId String  @map("usuario_id")
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+
+  matchesPerdido    Match[] @relation("itemPerdido")
+  matchesEncontrado Match[] @relation("itemEncontrado")
+
+  @@map("itens")
+}
+
+model Match {
+  id              String   @id @default(uuid())
+  score           Float
+  confirmado      Boolean  @default(false)
+  criadoEm        DateTime @default(now()) @map("criado_em")
+
+  // Relações
+  itemPerdidoId    String @map("item_perdido_id")
+  itemPerdido      Item   @relation("itemPerdido", fields: [itemPerdidoId], references: [id])
+
+  itemEncontradoId String @map("item_encontrado_id")
+  itemEncontrado   Item   @relation("itemEncontrado", fields: [itemEncontradoId], references: [id])
+
+  @@map("matches")
+}
+
+model Mensagem {
+  id        String   @id @default(uuid())
+  conteudo  String
+  lida      Boolean  @default(false)
+  criadoEm  DateTime @default(now()) @map("criado_em")
+
+  // Relações
+  remetenteId    String  @map("remetente_id")
+  remetente      Usuario @relation("remetente", fields: [remetenteId], references: [id])
+
+  destinatarioId String  @map("destinatario_id")
+  destinatario   Usuario @relation("destinatario", fields: [destinatarioId], references: [id])
+
+  @@map("mensagens")
+}
+
+model Notificacao {
+  id        String   @id @default(uuid())
+  titulo    String
+  mensagem  String
+  tipo      String   // "match", "mensagem", "sistema"
+  lida      Boolean  @default(false)
+  criadoEm  DateTime @default(now()) @map("criado_em")
+
+  // Relações
+  usuarioId String  @map("usuario_id")
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@map("notificacoes")
 }

@@ -1,8 +1,21 @@
-FROM node:alpine
+# Backend
+FROM node:20-alpine
 WORKDIR /app
-COPY package.json ./
+
+# Instalar dependências
+COPY package*.json ./
 RUN npm install
+
+# Copiar código fonte
 COPY . .
+
+# Gerar Prisma Client
 RUN npx prisma generate
-EXPOSE 5000
-CMD ["npm", "run", "dev"]
+
+# Criar pasta de uploads
+RUN mkdir -p uploads
+
+EXPOSE 3000
+
+# Comando para rodar migrações e iniciar o servidor
+CMD ["sh", "-c", "npx prisma migrate deploy && node src/servidor.js"]
