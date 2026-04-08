@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O Encontrei</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="screen">
+  <h2>Login</h2>
+  <input id="email" placeholder="Email">
+  <input id="senha" type="password" placeholder="Senha">
+ <button type="button" onclick="login()">Entrar</button>
+</div>
+
+<!-- HOME -->
+<div id="home" class="screen hidden">
+  <h2>Objetos Perdidos</h2>
+
+  <button type="button" onclick="mostrarCadastro()">+ Cadastrar</button>
+
+  <div id="lista"></div>
+</div>
+
+<!-- CADASTRO OBJETO -->
+<div id="cadastro" class="screen hidden">
+  <h2>Novo Objeto</h2>
+
+  <input id="nome" placeholder="Nome">
+  <input id="desc" placeholder="Descrição">
+  <input id="local" placeholder="Local">
+  
+  <input type="file" id="foto">
+
+  <button type="button" onclick="cadastrar()">Salvar</button>
+<button type="button" onclick="voltar()">Voltar</button>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

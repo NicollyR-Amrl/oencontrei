@@ -1,0 +1,17 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Objeto {
+  id               Int      @id @default(autoincrement())
+  nome             String   @db.VarChar(100)
+  descricao        String?
+  categoria        String?  @db.VarChar(50)
+  foto             String?  @db.VarChar(255)
+  local_encontrado String?  @db.VarChar(100)
+  data_encontrado  DateTime @default(now())
+}
