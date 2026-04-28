@@ -1,21 +1,26 @@
 // App.jsx — Roteador principal e layout
 
+import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './hooks/useAuth';
-import BarraNavegacao from './componentes/BarraNavegacao';
-import LayoutProtegido from './componentes/LayoutProtegido';
-import Login from './paginas/Login';
-import Cadastro from './paginas/Cadastro';
-import Inicio from './paginas/Inicio';
-import CadastroItemEncontrado from './paginas/CadastroItemEncontrado';
-import CadastroItemPerdido from './paginas/CadastroItemPerdido';
-import Matches from './paginas/Matches';
-import Chat from './paginas/Chat';
-import Perfil from './paginas/Perfil';
-import Admin from './paginas/Admin';
+import { useAuth } from './features/autenticacao/useAuth';
+import BarraNavegacao from './shared/componentes/BarraNavegacao';
+import LayoutProtegido from './shared/componentes/LayoutProtegido';
+import Login from './features/autenticacao/Login';
+import Cadastro from './features/autenticacao/Cadastro';
+import Inicio from './features/itens/Inicio';
+import CadastroItemEncontrado from './features/itens/CadastroItemEncontrado';
+import CadastroItemPerdido from './features/itens/CadastroItemPerdido';
+import Matches from './features/matches/Matches';
+import Chat from './features/chat/Chat';
+import Perfil from './features/perfil/Perfil';
+import Admin from './features/admin/Admin';
 
 export default function App() {
-  const { carregando } = useAuth();
+  const { carregando, verificarAuth } = useAuth();
+  
+  useEffect(() => {
+    verificarAuth();
+  }, [verificarAuth]);
 
   if (carregando) {
     return (
@@ -29,7 +34,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className="min-h-screen bg-fundo text-texto-primario relative">
       <Routes>
         {/* Rotas públicas */}
         <Route path="/login" element={<Login />} />

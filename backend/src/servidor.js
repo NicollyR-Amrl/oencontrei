@@ -25,9 +25,26 @@ const io = new Server(server, {
 });
 
 // Middlewares globais
+const origensPermitidas = [
+  process.env.FRONTEND_URL || 'http://localhost:5173',
+  'http://localhost:5173',
+  'http://localhost:80',
+  'http://localhost',
+  'http://127.0.0.1:5173',
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true
+  origin: (origin, callback) => {
+    // Permite requisições sem origin (ex: Postman, mobile) e origens conhecidas
+    if (!origin || origensPermitidas.includes(origin) || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS bloqueado para origem: ${origin}`));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -44,13 +61,13 @@ app.get('/api/saude', (req, res) => {
   res.json({ status: 'ok', mensagem: 'O Encontrei! API está funcionando 🎉' });
 });
 
-// Importar rotas
-const autenticacaoRotas = require('./rotas/autenticacao.rotas');
-const itensRotas = require('./rotas/itens.rotas');
-const matchingRotas = require('./rotas/matching.rotas');
-const chatRotas = require('./rotas/chat.rotas');
-const notificacoesRotas = require('./rotas/notificacoes.rotas');
-const adminRotas = require('./rotas/admin.rotas');
+// Importar rotas da nova estrutura (Vertical Slice)
+const autenticacaoRotas = require('./features/autenticacao/autenticacao.rotas');
+const itensRotas = require('./features/itens/itens.rotas');
+const matchingRotas = require('./features/matching/matching.rotas');
+const chatRotas = require('./features/chat/chat.rotas');
+const notificacoesRotas = require('./features/notificacoes/notificacoes.rotas');
+const adminRotas = require('./features/admin/admin.rotas');
 
 // Registrar rotas
 app.use('/api/autenticacao', autenticacaoRotas);
