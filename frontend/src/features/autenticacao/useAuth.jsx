@@ -44,7 +44,12 @@ export const useAuth = create((set, get) => ({
   },
 
   registrar: async (dados) => {
-    const res = await api.post('/autenticacao/registrar', dados);
+    // Se dados for FormData, envia com os headers corretos
+    const config = dados instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : {};
+
+    const res = await api.post('/autenticacao/registrar', dados, config);
     const { token: novoToken, usuario: dadosUsuario } = res.data;
 
     localStorage.setItem('encontrei_token', novoToken);

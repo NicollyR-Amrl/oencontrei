@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './useAuth';
-import { UserPlus, Eye, EyeOff, Mail, Lock, User, School } from 'lucide-react';
+import { UserPlus, Eye, EyeOff, Mail, Lock, User, School, Camera, X } from 'lucide-react';
 
 export default function Cadastro() {
   const [formulario, setFormulario] = useState({
@@ -13,7 +13,17 @@ export default function Cadastro() {
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
   const { registrar } = useAuth();
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
   const navigate = useNavigate();
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleChange = (e) => {
     setFormulario(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -30,12 +40,14 @@ export default function Cadastro() {
 
     setCarregando(true);
     try {
-      await registrar({
-        nome: formulario.nome,
-        email: formulario.email,
-        senha: formulario.senha,
-        turma: formulario.turma || null
-      });
+      const formData = new FormData();
+      formData.append('nome', formulario.nome);
+      formData.append('email', formulario.email);
+      formData.append('senha', formulario.senha);
+      if (formulario.turma) formData.append('turma', formulario.turma);
+      if (avatarFile) formData.append('avatar', avatarFile);
+
+      await registrar(formData);
       navigate('/');
     } catch (err) {
       setErro(err.response?.data?.mensagem || 'Erro ao cadastrar');
@@ -70,6 +82,40 @@ export default function Cadastro() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Upload de Avatar */}
+            <div className="flex flex-col items-center mb-6">
+              <div className="relative group cursor-pointer" onClick={() => document.getElementById('avatar-input').click()}>
+                {avatarPreview ? (
+                  <div className="relative">
+                    <img src={avatarPreview} alt="Preview" className="w-24 h-24 rounded-full object-cover border-4 border-primary-500/20" />
+                    <button 
+                      type="button" 
+                      onClick={(e) => { e.stopPropagation(); setAvatarPreview(null); setAvatarFile(null); }}
+                      className="absolute -top-1 -right-1 bg-perigo-500 text-white p-1 rounded-full hover:bg-perigo-600 transition-colors shadow-lg"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-fundo-card border-2 border-dashed border-borda flex flex-col items-center justify-center text-texto-secundario hover:border-primary-500 hover:text-primary-400 transition-all">
+                    <Camera size={28} />
+                    <span className="text-[10px] font-medium mt-1 uppercase">Foto</span>
+                  </div>
+                )}
+                <div className="absolute inset-0 rounded-full bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Camera size={20} className="text-white" />
+                </div>
+              </div>
+              <input 
+                id="avatar-input"
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                onChange={handleFileChange} 
+              />
+              <p className="text-xs text-texto-secundario mt-2">Toque para adicionar uma foto</p>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-texto-secundario mb-1.5">
                 <User size={14} className="inline mr-1" /> Nome completo

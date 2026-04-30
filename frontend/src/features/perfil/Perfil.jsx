@@ -78,15 +78,18 @@ export default function Perfil() {
           <img 
             src={displayImage} 
             alt={usuario?.nome} 
-            className="w-24 h-24 rounded-full object-cover border-4 border-primary-500/20"
+            className={`w-24 h-24 rounded-full object-cover border-4 transition-all ${editando ? 'border-primary-500 shadow-lg scale-105' : 'border-primary-500/20'}`}
           />
           {editando && (
-            <button 
-              onClick={() => fileInputRef.current?.click()}
-              className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-white text-xs"
-            >
-              <Camera size={20} />
-            </button>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                className="bg-primary-600/80 text-white p-2 rounded-full hover:bg-primary-500 transition-all shadow-xl"
+                title="Trocar foto"
+              >
+                <Camera size={20} />
+              </button>
+            </div>
           )}
         </div>
       );
@@ -94,13 +97,13 @@ export default function Perfil() {
 
     return (
       <div 
-        className={`w-24 h-24 rounded-full gradient-primary flex items-center justify-center text-4xl font-bold text-white shrink-0 animate-pulse-glow cursor-pointer`}
+        className={`w-24 h-24 rounded-full gradient-primary flex items-center justify-center text-4xl font-bold text-white shrink-0 animate-pulse-glow cursor-pointer relative group ${editando ? 'ring-4 ring-primary-500 shadow-lg scale-105' : ''}`}
         onClick={() => editando && fileInputRef.current?.click()}
       >
         {usuario?.nome?.charAt(0)?.toUpperCase()}
         {editando && (
-          <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-            <Camera size={20} />
+          <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center transition-opacity">
+            <Camera size={24} className="text-white" />
           </div>
         )}
       </div>
@@ -112,7 +115,10 @@ export default function Perfil() {
       {/* Card perfil */}
       <div className="glass-strong rounded-2xl p-6 md:p-8 mb-6">
         <div className="flex flex-col sm:flex-row items-center gap-6">
-          {renderAvatar()}
+          <div className="flex flex-col items-center gap-2">
+            {renderAvatar()}
+            {editando && <span className="text-[10px] text-primary-400 font-bold uppercase tracking-wider animate-pulse">Toque para mudar</span>}
+          </div>
           <input 
             type="file" 
             ref={fileInputRef} 
@@ -124,10 +130,10 @@ export default function Perfil() {
             <h1 className="text-2xl font-extrabold gradient-text">{usuario?.nome}</h1>
             <p className="text-texto-secundario text-sm mt-1">{usuario?.email}</p>
             <div className="flex items-center gap-3 mt-3 justify-center sm:justify-start flex-wrap">
-              {usuario?.avatar && editando && (
+              {(usuario?.avatar || avatarPreview) && editando && (
                 <button 
                   onClick={removerAvatar}
-                  className="text-xs flex items-center gap-1 text-perigo-400 hover:text-perigo-300 transition-colors bg-perigo-500/10 px-2 py-1 rounded-md"
+                  className="text-xs flex items-center gap-1 text-perigo-400 hover:text-perigo-300 transition-colors bg-perigo-500/10 px-3 py-1.5 rounded-lg border border-perigo-500/20"
                 >
                   <Trash2 size={12} /> Remover foto
                 </button>

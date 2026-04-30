@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Upload, MapPin, Tag, FileText, Image } from 'lucide-react';
+import { BASE_URL } from '../../shared/servicos/api';
 
 const CATEGORIAS = [
   { valor: 'ELETRONICO', label: '📱 Eletrônico' },
@@ -14,16 +15,18 @@ const CATEGORIAS = [
   { valor: 'OUTRO', label: '📦 Outro' },
 ];
 
-export default function FormularioItem({ tipo, onSubmit, carregando }) {
+export default function FormularioItem({ tipo, onSubmit, carregando, initialData = null }) {
   const [formulario, setFormulario] = useState({
-    titulo: '',
-    descricao: '',
-    categoria: '',
-    local: '',
-    data: new Date().toISOString().split('T')[0],
+    titulo: initialData?.titulo || '',
+    descricao: initialData?.descricao || '',
+    categoria: initialData?.categoria || '',
+    local: initialData?.local || '',
+    data: initialData?.data 
+      ? new Date(initialData.data).toISOString().split('T')[0] 
+      : new Date().toISOString().split('T')[0],
   });
   const [imagem, setImagem] = useState(null);
-  const [previewImagem, setPreviewImagem] = useState(null);
+  const [previewImagem, setPreviewImagem] = useState(initialData?.imagem ? `${BASE_URL}${initialData.imagem}` : null);
 
   const handleChange = (e) => {
     setFormulario(prev => ({ ...prev, [e.target.name]: e.target.value }));

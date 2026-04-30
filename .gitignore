@@ -37,3 +37,7 @@ yarn-error.log*
 
 # Temporary files
 /tmp/
+/uploads/
+/backend/uploads/
+**/node_modules/
+.agent/

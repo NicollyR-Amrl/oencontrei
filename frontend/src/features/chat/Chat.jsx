@@ -84,9 +84,19 @@ export default function Chat() {
       const res = await api.get(`/chat/mensagens/${id}`);
       setMensagens(res.data.mensagens);
 
-      // Encontrar info do contato
+      // Tentar encontrar info do contato na lista de conversas
       const conversa = conversas.find(c => c.usuario.id === id);
-      if (conversa) setContatoInfo(conversa.usuario);
+      if (conversa) {
+        setContatoInfo(conversa.usuario);
+      } else {
+        // Se não estiver na lista (conversa nova), buscar info básica do usuário
+        try {
+          const userRes = await api.get(`/autenticacao/usuario/${id}`);
+          setContatoInfo(userRes.data.usuario);
+        } catch (e) {
+          console.error('Erro ao buscar info do usuário:', e);
+        }
+      }
 
       setTimeout(scrollParaBaixo, 100);
     } catch (err) {

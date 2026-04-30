@@ -10,6 +10,7 @@ import Cadastro from './features/autenticacao/Cadastro';
 import Inicio from './features/itens/Inicio';
 import CadastroItemEncontrado from './features/itens/CadastroItemEncontrado';
 import CadastroItemPerdido from './features/itens/CadastroItemPerdido';
+import EditarItem from './features/itens/EditarItem';
 import Matches from './features/matches/Matches';
 import Chat from './features/chat/Chat';
 import Perfil from './features/perfil/Perfil';
@@ -34,7 +35,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-fundo text-texto-primario relative">
+    <div className="min-h-screen bg-fundo-escuro text-texto-primario relative">
       <Routes>
         {/* Rotas públicas */}
         <Route path="/login" element={<Login />} />
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="/" element={<Inicio />} />
           <Route path="/encontrei" element={<CadastroItemEncontrado />} />
           <Route path="/perdi" element={<CadastroItemPerdido />} />
+          <Route path="/editar-item/:id" element={<EditarItem />} />
           <Route path="/matches" element={<Matches />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/chat/:usuarioId" element={<Chat />} />

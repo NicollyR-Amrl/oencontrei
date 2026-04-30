@@ -2,14 +2,15 @@
 
 const express = require('express');
 const router = express.Router();
-const { registrar, login, perfil, atualizarPerfil } = require('./autenticacao.controlador');
+const { registrar, login, perfil, atualizarPerfil, obterUsuario } = require('./autenticacao.controlador');
 const { verificarToken } = require('../../shared/autenticacao.middleware');
 const { validarCadastro, validarLogin } = require('../../shared/validacao.middleware');
 const { upload } = require('../../shared/upload.middleware');
 
 // Rotas públicas
-router.post('/registrar', validarCadastro, registrar);
+router.post('/registrar', upload.single('avatar'), validarCadastro, registrar);
 router.post('/login', validarLogin, login);
+router.get('/usuario/:id', obterUsuario);
 
 // Rotas protegidas
 router.get('/perfil', verificarToken, perfil);

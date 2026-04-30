@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../shared/servicos/api';
 import CartaoItem from './CartaoItem';
-import { Search, PlusCircle, AlertTriangle, Filter, Package } from 'lucide-react';
+import ModalDetalhesItem from './ModalDetalhesItem';
+import { Search, PlusCircle, AlertTriangle, Package, User } from 'lucide-react';
 
 const CATEGORIAS = [
   { valor: '', label: 'Todas' },
@@ -24,6 +25,8 @@ export default function Inicio() {
   const [busca, setBusca] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('');
   const [filtroCategoria, setFiltroCategoria] = useState('');
+  const [apenasMeus, setApenasMeus] = useState(false);
+  const [itemSelecionado, setItemSelecionado] = useState(null);
   const [paginacao, setPaginacao] = useState({ pagina: 1, totalPaginas: 1 });
   const navigate = useNavigate();
 
@@ -35,7 +38,8 @@ export default function Inicio() {
       if (filtroTipo) params.tipo = filtroTipo;
       if (filtroCategoria) params.categoria = filtroCategoria;
 
-      const res = await api.get('/itens', { params });
+      const endpoint = apenasMeus ? '/itens/usuario/meus' : '/itens';
+      const res = await api.get(endpoint, { params });
       setItens(res.data.itens);
       setPaginacao(res.data.paginacao);
     } catch (err) {
@@ -47,7 +51,7 @@ export default function Inicio() {
 
   useEffect(() => {
     carregarItens();
-  }, [filtroTipo, filtroCategoria]);
+  }, [filtroTipo, filtroCategoria, apenasMeus]);
 
   const handleBusca = (e) => {
     e.preventDefault();
@@ -56,30 +60,14 @@ export default function Inicio() {
 
   return (
     <div className="animate-fade-in">
-      {/* Header */}
-      <div className="mb-8">
+      {/* Header - Mobile */}
+      <div className="mb-8 md:hidden">
         <h1 className="text-3xl md:text-4xl font-extrabold gradient-text mb-2">
           Achados & Perdidos
         </h1>
         <p className="text-texto-secundario">
           Encontre ou registre objetos perdidos na escola
         </p>
-      </div>
-
-      {/* Botões de ação */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
-        <button
-          onClick={() => navigate('/encontrei')}
-          className="btn-primary justify-center py-4 text-sm md:text-base rounded-xl"
-        >
-          <PlusCircle size={20} /> Encontrei um Item
-        </button>
-        <button
-          onClick={() => navigate('/perdi')}
-          className="btn-danger justify-center py-4 text-sm md:text-base rounded-xl flex items-center gap-2"
-        >
-          <AlertTriangle size={20} /> Perdi um Item
-        </button>
       </div>
 
       {/* Barra de busca */}
@@ -101,7 +89,6 @@ export default function Inicio() {
 
       {/* Filtros */}
       <div className="flex flex-wrap gap-3 mb-6">
-        {/* Filtro por tipo */}
         <div className="flex gap-2">
           {[
             { valor: '', label: 'Todos', icone: Package },
@@ -122,7 +109,17 @@ export default function Inicio() {
           ))}
         </div>
 
-        {/* Filtro por categoria */}
+        <button
+          onClick={() => setApenasMeus(!apenasMeus)}
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+            apenasMeus
+              ? 'bg-acento-500/20 text-acento-400 border border-acento-500/30'
+              : 'bg-fundo-card text-texto-secundario border border-borda hover:border-acento-500/30'
+          }`}
+        >
+          <User size={14} /> Meus Itens
+        </button>
+
         <select
           value={filtroCategoria}
           onChange={(e) => setFiltroCategoria(e.target.value)}
@@ -149,10 +146,19 @@ export default function Inicio() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {itens.map((item, i) => (
             <div key={item.id} style={{ animationDelay: `${i * 0.05}s` }}>
-              <CartaoItem item={item} onClick={() => {}} />
+              <CartaoItem item={item} onClick={setItemSelecionado} />
             </div>
           ))}
         </div>
+      )}
+
+      {/* Modal de Detalhes */}
+      {itemSelecionado && (
+        <ModalDetalhesItem 
+          item={itemSelecionado} 
+          onClose={() => setItemSelecionado(null)} 
+          onUpdate={carregarItens}
+        />
       )}
 
       {/* Paginação */}

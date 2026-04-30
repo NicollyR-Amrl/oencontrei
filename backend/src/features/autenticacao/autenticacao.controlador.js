@@ -26,11 +26,12 @@ const registrar = async (req, res) => {
         email,
         senha: senhaHash,
         turma: turma || null,
-        cargo: cargo || 'ALUNO'
+        cargo: cargo || 'ALUNO',
+        avatar: req.file ? `/uploads/${req.file.filename}` : null
       },
       select: {
         id: true, nome: true, email: true,
-        turma: true, cargo: true, reputacao: true, criadoEm: true
+        turma: true, cargo: true, reputacao: true, avatar: true, criadoEm: true
       }
     });
 
@@ -145,4 +146,27 @@ const atualizarPerfil = async (req, res) => {
   }
 };
 
-module.exports = { registrar, login, perfil, atualizarPerfil };
+/**
+ * Obter informações públicas de um usuário
+ * GET /api/autenticacao/usuario/:id
+ */
+const obterUsuario = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const usuario = await prisma.usuario.findUnique({
+      where: { id },
+      select: { id: true, nome: true, avatar: true, turma: true, cargo: true }
+    });
+
+    if (!usuario) {
+      return res.status(404).json({ erro: true, mensagem: 'Usuário não encontrado' });
+    }
+
+    res.json({ sucesso: true, usuario });
+  } catch (erro) {
+    console.error('Erro ao buscar usuário:', erro);
+    res.status(500).json({ erro: true, mensagem: 'Erro ao buscar usuário' });
+  }
+};
+
+module.exports = { registrar, login, perfil, atualizarPerfil, obterUsuario };

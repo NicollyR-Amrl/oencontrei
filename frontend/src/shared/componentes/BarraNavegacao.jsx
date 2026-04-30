@@ -70,9 +70,10 @@ export default function BarraNavegacao() {
         {/* Toggle Button Desktop */}
         <button 
           onClick={toggleSidebar}
-          className="absolute -right-3 top-10 w-6 h-6 bg-primary-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-primary-500 transition-colors z-[60]"
+          className="absolute right-2 top-10 w-8 h-8 bg-primary-600/50 hover:bg-primary-500 text-white rounded-lg flex items-center justify-center backdrop-blur-md border border-white/10 transition-all z-[60]"
+          title={sidebarColapsada ? "Expandir" : "Recolher"}
         >
-          {sidebarColapsada ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          {sidebarColapsada ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
         </button>
 
         {/* Logo */}
