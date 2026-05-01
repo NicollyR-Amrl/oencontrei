@@ -21,21 +21,21 @@ export default function BarraNavegacao() {
   const linkClasses = ({ isActive }) =>
     `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
       isActive
-        ? 'bg-primary-500/20 text-primary-400 font-semibold'
-        : 'text-texto-secundario hover:text-texto-primario hover:bg-fundo-card-hover'
+        ? 'bg-primary-100 text-primary-700 font-semibold'
+        : 'text-texto-secundario hover:text-primary-600 hover:bg-primary-50'
     }`;
 
   const mobileLinkClasses = ({ isActive }) =>
     `flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all duration-200 text-xs ${
       isActive
-        ? 'text-primary-400 font-semibold'
+        ? 'text-primary-600 font-semibold'
         : 'text-texto-secundario'
     }`;
 
   return (
     <>
       {/* ===== Sidebar Desktop ===== */}
-      <aside className="hidden md:flex flex-col fixed left-0 top-0 h-full w-64 glass-strong z-50 p-6">
+      <aside className="hidden md:flex flex-col fixed left-0 top-0 h-full w-64 bg-white border-r border-borda z-50 p-6 shadow-sm">
         {/* Logo */}
         <div className="mb-8">
           <h1 className="text-2xl font-extrabold gradient-text">O Encontrei!</h1>
@@ -72,7 +72,7 @@ export default function BarraNavegacao() {
 
         {/* Notificações */}
         <div className="mb-4">
-          <NavLink to="/perfil" className="flex items-center gap-3 px-4 py-3 rounded-xl text-texto-secundario hover:text-texto-primario hover:bg-fundo-card-hover transition-all">
+          <NavLink to="/perfil" className="flex items-center gap-3 px-4 py-3 rounded-xl text-texto-secundario hover:text-primary-600 hover:bg-primary-50 transition-all">
             <div className="relative">
               <Bell size={20} />
               {naoLidas > 0 && (
@@ -98,7 +98,7 @@ export default function BarraNavegacao() {
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-perigo-400 hover:bg-perigo-500/10 transition-all"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-perigo-500 hover:bg-perigo-500/10 transition-all"
           >
             <LogOut size={20} /> Sair
           </button>
@@ -106,7 +106,7 @@ export default function BarraNavegacao() {
       </aside>
 
       {/* ===== Bottom Nav Mobile ===== */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-strong z-50 px-2 py-1 safe-area-inset-bottom">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-borda z-50 px-2 py-1 safe-area-inset-bottom shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
         <div className="flex justify-around items-center">
           <NavLink to="/" className={mobileLinkClasses} end>
             <Home size={22} />

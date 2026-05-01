@@ -81,18 +81,18 @@ export default function Matches() {
       {/* Meus itens ativos */}
       {meusItens.length > 0 && (
         <div className="mb-10">
-          <h2 className="text-xl font-bold mb-4">🔍 Buscar matches para seus itens</h2>
+          <h2 className="text-xl font-bold mb-4 text-texto-primario">🔍 Buscar matches para seus itens</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {meusItens.map(item => (
               <button
                 key={item.id}
                 onClick={() => buscarMatchesParaItem(item)}
                 className={`card text-left flex items-center gap-4 ${
-                  itemSelecionado?.id === item.id ? 'border-primary-500' : ''
+                  itemSelecionado?.id === item.id ? 'border-primary-500 bg-primary-50' : ''
                 }`}
               >
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${
-                  item.tipo === 'PERDIDO' ? 'bg-perigo-500/20' : 'bg-acento-500/20'
+                  item.tipo === 'PERDIDO' ? 'bg-perigo-500/10' : 'bg-acento-500/10'
                 }`}>
                   {item.tipo === 'PERDIDO' ? '❓' : '✅'}
                 </div>
@@ -112,18 +112,18 @@ export default function Matches() {
       {/* Resultados do match */}
       {itemSelecionado && (
         <div className="mb-10">
-          <h2 className="text-xl font-bold mb-4">
+          <h2 className="text-xl font-bold mb-4 text-texto-primario">
             🤖 Correspondências para "{itemSelecionado.titulo}"
           </h2>
 
           {buscandoMatch ? (
             <div className="flex items-center gap-3 py-10 justify-center text-texto-secundario">
-              <Loader size={24} className="animate-spin" />
+              <Loader size={24} className="animate-spin text-primary-500" />
               <span>Analisando correspondências com IA...</span>
             </div>
           ) : matchesItem.length === 0 ? (
             <div className="text-center py-10">
-              <Handshake size={48} className="mx-auto text-texto-secundario opacity-30 mb-3" />
+              <Handshake size={48} className="mx-auto text-primary-200 mb-3" />
               <p className="text-texto-secundario">Nenhuma correspondência encontrada ainda</p>
             </div>
           ) : (
@@ -176,20 +176,20 @@ export default function Matches() {
       {/* Matches existentes */}
       {matches.length > 0 && !itemSelecionado && (
         <div>
-          <h2 className="text-xl font-bold mb-4">📋 Seus matches anteriores</h2>
+          <h2 className="text-xl font-bold mb-4 text-texto-primario">📋 Seus matches anteriores</h2>
           <div className="space-y-4">
             {matches.map(match => (
               <div key={match.id} className="card flex items-center gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-1">
                     <span className="font-semibold">{match.itemPerdido?.titulo}</span>
-                    <ArrowRight size={16} className="text-primary-400" />
+                    <ArrowRight size={16} className="text-primary-500" />
                     <span className="font-semibold">{match.itemEncontrado?.titulo}</span>
                   </div>
                   <IndicadorMatch score={match.score} />
                 </div>
                 {match.confirmado && (
-                  <span className="text-acento-400 font-bold text-sm flex items-center gap-1">
+                  <span className="text-acento-500 font-bold text-sm flex items-center gap-1">
                     <Check size={16} /> Confirmado
                   </span>
                 )}
@@ -201,7 +201,7 @@ export default function Matches() {
 
       {matches.length === 0 && meusItens.length === 0 && (
         <div className="text-center py-20">
-          <Handshake size={64} className="mx-auto text-texto-secundario opacity-30 mb-4" />
+          <Handshake size={64} className="mx-auto text-primary-200 mb-4" />
           <p className="text-texto-secundario text-lg">Nenhum match ainda</p>
           <p className="text-texto-secundario text-sm mt-1">
             Cadastre um item perdido ou encontrado para começar

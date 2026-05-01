@@ -63,20 +63,20 @@ export default function FormularioItem({ tipo, onSubmit, carregando }) {
         </label>
         <div className="relative">
           {previewImagem ? (
-            <div className="relative rounded-xl overflow-hidden aspect-video mb-2">
+            <div className="relative rounded-xl overflow-hidden aspect-video mb-2 border border-borda">
               <img src={previewImagem} alt="Preview" className="w-full h-full object-cover" />
               <button
                 type="button"
                 onClick={() => { setImagem(null); setPreviewImagem(null); }}
-                className="absolute top-2 right-2 w-8 h-8 bg-fundo-escuro/80 rounded-full flex items-center justify-center text-perigo-400 hover:bg-perigo-500 hover:text-white transition-all"
+                className="absolute top-2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center text-perigo-500 hover:bg-perigo-500 hover:text-white transition-all shadow-md"
               >
                 ✕
               </button>
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-borda rounded-xl cursor-pointer hover:border-primary-500 transition-all bg-fundo-card">
-              <Upload size={32} className="text-texto-secundario mb-2" />
-              <span className="text-texto-secundario text-sm">Clique para enviar uma foto</span>
+            <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-primary-200 rounded-xl cursor-pointer hover:border-primary-400 hover:bg-primary-50/50 transition-all bg-white">
+              <Upload size={32} className="text-primary-300 mb-2" />
+              <span className="text-texto-secundario text-sm font-medium">Clique para enviar uma foto</span>
               <span className="text-texto-secundario text-xs mt-1">JPEG, PNG, WebP (max 5MB)</span>
               <input type="file" accept="image/*" onChange={handleImagem} className="hidden" />
             </label>

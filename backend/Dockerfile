@@ -18,4 +18,4 @@ RUN mkdir -p uploads
 EXPOSE 3000
 
 # Comando para rodar migrações e iniciar o servidor
-CMD ["sh", "-c", "npx prisma migrate deploy && node src/servidor.js"]
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node src/servidor.js"]

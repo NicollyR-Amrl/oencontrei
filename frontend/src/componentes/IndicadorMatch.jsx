@@ -4,15 +4,15 @@ export default function IndicadorMatch({ score }) {
   let corClasse, icone, label;
 
   if (score >= 70) {
-    corClasse = 'text-acento-400 border-acento-500/30 bg-acento-500/10';
+    corClasse = 'text-acento-600 border-acento-500/30 bg-acento-500/10';
     icone = '🎯';
     label = 'Excelente';
   } else if (score >= 40) {
-    corClasse = 'text-aviso-400 border-aviso-500/30 bg-aviso-500/10';
+    corClasse = 'text-aviso-500 border-aviso-500/30 bg-aviso-500/10';
     icone = '🔍';
     label = 'Possível';
   } else {
-    corClasse = 'text-texto-secundario border-borda bg-fundo-card';
+    corClasse = 'text-texto-secundario border-borda bg-primary-50';
     icone = '❓';
     label = 'Baixo';
   }

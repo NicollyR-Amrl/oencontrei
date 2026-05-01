@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Package, Handshake, Check } from 'lucide-react';
+import { Users, Package, Handshake, Check, AlertCircle } from 'lucide-react';
 import api from '../../servicos/api';
 
 export default function AdminDashboard() {
@@ -28,23 +28,26 @@ export default function AdminDashboard() {
 
   if (!stats) return null;
 
+  // Adaptando os cards para exibir exatamente as métricas exigidas nos requisitos
   const cards = [
-    { label: 'Usuários', valor: stats.totalUsuarios, icone: Users, cor: 'text-primary-400' },
-    { label: 'Itens Totais', valor: stats.totalItens, icone: Package, cor: 'text-secondary-400' },
-    { label: 'Itens Perdidos', valor: stats.itensPerdidos, icone: Package, cor: 'text-perigo-400' },
-    { label: 'Itens Encontrados', valor: stats.itensEncontrados, icone: Package, cor: 'text-acento-400' },
-    { label: 'Itens Devolvidos', valor: stats.itensDevolvidos, icone: Check, cor: 'text-aviso-400' },
-    { label: 'Total Matches', valor: stats.totalMatches, icone: Handshake, cor: 'text-primary-400' },
+    { label: 'Itens Encontrados', valor: stats.itensEncontrados || 0, icone: Package, corBg: 'bg-acento-500/10', corIcone: 'text-acento-600' },
+    { label: 'Itens Perdidos', valor: stats.itensPerdidos || 0, icone: Package, corBg: 'bg-perigo-500/10', corIcone: 'text-perigo-500' },
+    { label: 'Itens Devolvidos', valor: stats.itensDevolvidos || 0, icone: Check, corBg: 'bg-aviso-500/10', corIcone: 'text-aviso-500' },
+    { label: 'Relatos Ativos', valor: (stats.itensEncontrados + stats.itensPerdidos - stats.itensDevolvidos) || 0, icone: AlertCircle, corBg: 'bg-primary-100', corIcone: 'text-primary-600' },
+    { label: 'Total Matches', valor: stats.totalMatches || 0, icone: Handshake, corBg: 'bg-primary-50', corIcone: 'text-primary-500' },
+    { label: 'Usuários Cadastrados', valor: stats.totalUsuarios || 0, icone: Users, corBg: 'bg-secondary-100', corIcone: 'text-secondary-600' },
   ];
 
   return (
     <div className="animate-fade-in">
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         {cards.map((s) => (
-          <div key={s.label} className="card text-center">
-            <s.icone size={24} className={`mx-auto mb-2 ${s.cor}`} />
-            <p className="text-2xl font-extrabold">{s.valor}</p>
-            <p className="text-xs text-texto-secundario">{s.label}</p>
+          <div key={s.label} className="card text-center flex flex-col items-center justify-center p-6">
+            <div className={`w-14 h-14 rounded-xl mb-4 flex items-center justify-center ${s.corBg}`}>
+              <s.icone size={28} className={s.corIcone} />
+            </div>
+            <p className="text-3xl font-extrabold text-texto-primario mb-1">{s.valor}</p>
+            <p className="text-xs font-semibold text-texto-secundario uppercase tracking-wider">{s.label}</p>
           </div>
         ))}
       </div>
