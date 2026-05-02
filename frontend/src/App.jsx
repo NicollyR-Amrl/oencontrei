@@ -36,7 +36,7 @@ export default function App() {
   if (carregando) return <LoadingScreen />;
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className="min-h-screen">
       <Suspense fallback={<LoadingScreen />}>
         <Routes>
           {/* Rotas públicas */}
