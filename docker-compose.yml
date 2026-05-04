@@ -1,17 +1,4 @@
-<<<<<<< HEAD
-version: '3.8'
-services:
-  dev:
-    image: node:latest
-    container_name: dev-env
-    volumes:
-      - .:/workspace
-    working_dir: /workspace
-    stdin_open: true
-    tty: true
-    command: bash
-=======
-# O Encontrei! — Docker Compose
+# O Encontrei! – Docker Compose
 # Rodar com: docker-compose up --build
 
 version: '3.8'
@@ -37,7 +24,7 @@ services:
     networks:
       - encontrei-rede
 
-  # Backend — Node.js + Express
+  # Backend – Node.js + Express
   backend:
     build: ./backend
     container_name: encontrei-backend
@@ -57,7 +44,7 @@ services:
     networks:
       - encontrei-rede
 
-  # Frontend — React + Vite (servido com nginx)
+  # Frontend – React + Vite (servido com nginx)
   frontend:
     build: ./frontend
     container_name: encontrei-frontend
@@ -75,4 +62,3 @@ volumes:
 networks:
   encontrei-rede:
     driver: bridge
->>>>>>> b0d7930d420da6a53bd6122c9bb68d15a93b0a50

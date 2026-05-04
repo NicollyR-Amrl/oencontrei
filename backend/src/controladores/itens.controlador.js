@@ -62,11 +62,11 @@ const listarItens = async (req, res) => {
     if (tipo) where.tipo = tipo;
     if (categoria) where.categoria = categoria;
     if (status) where.status = status;
-    if (local) where.local = { contains: local, mode: 'insensitive' };
+    if (local) where.local = { contains: local };
     if (busca) {
       where.OR = [
-        { titulo: { contains: busca, mode: 'insensitive' } },
-        { descricao: { contains: busca, mode: 'insensitive' } }
+        { titulo: { contains: busca } },
+        { descricao: { contains: busca } }
       ];
     }
 
@@ -209,7 +209,16 @@ const meusItens = async (req, res) => {
       }
     });
 
-    res.json({ sucesso: true, itens });
+    res.json({ 
+      sucesso: true, 
+      itens,
+      paginacao: {
+        pagina: 1,
+        limite: itens.length,
+        total: itens.length,
+        totalPaginas: 1
+      }
+    });
   } catch (erro) {
     console.error('Erro ao listar meus itens:', erro);
     res.status(500).json({ erro: true, mensagem: 'Erro ao listar seus itens' });

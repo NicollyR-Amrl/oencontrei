@@ -1,11 +1,12 @@
-// App.jsx — Roteador principal com Lazy Loading e Nested Routing
+// App.jsx — Roteador principal com Lazy Loading e Nested Routing (Versão Premium do Amigo)
 
 import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import LayoutProtegido from './componentes/LayoutProtegido';
+import Simulador from './paginas/Simulador';
 
-// Lazy Loading das páginas
+// Lazy Loading das páginas (Pasta /paginas)
 const Login = lazy(() => import('./paginas/Login'));
 const Cadastro = lazy(() => import('./paginas/Cadastro'));
 const Inicio = lazy(() => import('./paginas/Inicio'));
@@ -14,18 +15,19 @@ const CadastroItemPerdido = lazy(() => import('./paginas/CadastroItemPerdido'));
 const Matches = lazy(() => import('./paginas/Matches'));
 const Chat = lazy(() => import('./paginas/Chat'));
 const Perfil = lazy(() => import('./paginas/Perfil'));
+const DetalhesItem = lazy(() => import('./paginas/DetalhesItem'));
 
 // Admin e suas sub-rotas
 const Admin = lazy(() => import('./paginas/Admin'));
 const AdminDashboard = lazy(() => import('./paginas/admin/AdminDashboard'));
 const AdminItens = lazy(() => import('./paginas/admin/AdminItens'));
 
-// Componente de Loading Simples
+// Componente de Loading Premium
 const LoadingScreen = () => (
-  <div className="flex items-center justify-center min-h-screen">
+  <div className="flex items-center justify-center min-h-screen bg-fundo-escuro">
     <div className="text-center">
-      <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-      <p className="text-texto-secundario text-lg">Carregando...</p>
+      <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4 shadow-lg shadow-primary-500/20"></div>
+      <p className="text-texto-secundario text-lg font-medium animate-pulse">Carregando O Encontrei!...</p>
     </div>
   </div>
 );
@@ -42,6 +44,7 @@ export default function App() {
           {/* Rotas públicas */}
           <Route path="/login" element={<Login />} />
           <Route path="/cadastro" element={<Cadastro />} />
+          <Route path="/simulador" element={<Simulador />} />
 
           {/* Rotas protegidas */}
           <Route element={<LayoutProtegido />}>
@@ -52,6 +55,7 @@ export default function App() {
             <Route path="/chat" element={<Chat />} />
             <Route path="/chat/:usuarioId" element={<Chat />} />
             <Route path="/perfil" element={<Perfil />} />
+            <Route path="/item/:id" element={<DetalhesItem />} />
             
             {/* Admin com Roteamento Aninhado */}
             <Route path="/admin" element={<Admin />}>

@@ -1,8 +1,5 @@
 @import "tailwindcss";
 
-/* Importando fonte premium Outfit e Inter */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
-
 /* ===== Tema O Encontrei! — Azul Claro Premium (Light Mode) ===== */
 @theme {
   /* Paleta primária — Azul Vibrante / Royal */

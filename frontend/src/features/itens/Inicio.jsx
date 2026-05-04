@@ -162,7 +162,7 @@ export default function Inicio() {
       )}
 
       {/* Paginação */}
-      {paginacao.totalPaginas > 1 && (
+      {paginacao?.totalPaginas > 1 && (
         <div className="flex justify-center gap-2 mt-8">
           {Array.from({ length: paginacao.totalPaginas }, (_, i) => (
             <button

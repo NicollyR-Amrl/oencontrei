@@ -1,11 +1,11 @@
 // Perfil — Perfil do usuário, histórico e notificações
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNotificacoes } from '../hooks/useNotificacoes';
 import NotificacaoComp from '../componentes/Notificacao';
 import api from '../servicos/api';
-import { Star, Bell, CheckCheck, Settings } from 'lucide-react';
+import { Star, Bell, CheckCheck, Settings, Camera, Trash2, LogIn } from 'lucide-react';
 
 export default function Perfil() {
   const { usuario, atualizarUsuario } = useAuth();
@@ -13,13 +13,83 @@ export default function Perfil() {
   const [abaAtiva, setAbaAtiva] = useState('perfil');
   const [editando, setEditando] = useState(false);
   const [form, setForm] = useState({ nome: usuario?.nome || '', turma: usuario?.turma || '' });
+  
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  };
 
   const salvar = async () => {
     try {
-      const res = await api.put('/autenticacao/perfil', form);
+      const formData = new FormData();
+      formData.append('nome', form.nome);
+      formData.append('turma', form.turma);
+      if (avatarFile) {
+        formData.append('avatar', avatarFile);
+      }
+
+      const res = await api.put('/autenticacao/perfil', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
       atualizarUsuario(res.data.usuario);
       setEditando(false);
-    } catch { alert('Erro ao atualizar'); }
+      setAvatarFile(null);
+      setAvatarPreview(null);
+    } catch (e) { 
+      console.error(e);
+      alert('Erro ao atualizar'); 
+    }
+  };
+
+  const renderAvatar = () => {
+    const displayImage = avatarPreview || (usuario?.avatar ? usuario.avatar : null);
+    
+    if (displayImage) {
+      return (
+        <div className="relative group">
+          <img 
+            src={displayImage} 
+            alt={usuario?.nome} 
+            className={`w-24 h-24 rounded-full object-cover border-4 transition-all ${editando ? 'border-primary-500 shadow-lg scale-105' : 'border-primary-200 shadow-sm'}`}
+          />
+          {editando && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                className="bg-white/90 text-primary-600 p-2 rounded-full hover:bg-white transition-all shadow-lg"
+                title="Trocar foto"
+              >
+                <Camera size={20} />
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div 
+        className={`w-24 h-24 rounded-full gradient-primary flex items-center justify-center text-4xl font-bold text-white shrink-0 animate-pulse-glow cursor-pointer relative group ${editando ? 'ring-4 ring-primary-400 shadow-lg scale-105' : ''}`}
+        onClick={() => editando && fileInputRef.current?.click()}
+      >
+        {usuario?.nome?.charAt(0)?.toUpperCase()}
+        {editando && (
+          <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <Camera size={24} className="text-white" />
+          </div>
+        )}
+      </div>
+    );
   };
 
   const abaBtnCls = (aba) => `flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
@@ -31,9 +101,17 @@ export default function Perfil() {
       {/* Card perfil */}
       <div className="bg-white rounded-2xl p-6 md:p-8 mb-6 shadow-sm border border-borda">
         <div className="flex flex-col sm:flex-row items-center gap-6">
-          <div className="w-24 h-24 rounded-full gradient-primary flex items-center justify-center text-4xl font-bold text-white shrink-0 animate-pulse-glow">
-            {usuario?.nome?.charAt(0)?.toUpperCase()}
+          <div className="flex flex-col items-center gap-2">
+            {renderAvatar()}
+            {editando && <span className="text-[10px] text-primary-400 font-bold uppercase tracking-wider animate-pulse">Toque para mudar</span>}
           </div>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            className="hidden" 
+            accept="image/*" 
+            onChange={handleFileChange} 
+          />
           <div className="flex-1 text-center sm:text-left">
             <h1 className="text-2xl font-extrabold gradient-text">{usuario?.nome}</h1>
             <p className="text-texto-secundario text-sm mt-1">{usuario?.email}</p>

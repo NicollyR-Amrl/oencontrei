@@ -7,6 +7,18 @@ import CartaoItem from '../componentes/CartaoItem';
 import { Search, PlusCircle, Filter, PackageSearch, ChevronRight, Frown, MapPin, Sparkles } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
+const CATEGORIAS = [
+  { valor: '', label: 'Todas Categorias' },
+  { valor: 'ROUPA', label: '👕 Roupas' },
+  { valor: 'ELETRONICO', label: '📱 Eletrônicos' },
+  { valor: 'MATERIAL_ESCOLAR', label: '📚 Material Escolar' },
+  { valor: 'ACESSORIO', label: '⌚ Acessórios' },
+  { valor: 'CHAVE', label: '🔑 Chaves' },
+  { valor: 'DOCUMENTO', label: '📄 Documentos' },
+  { valor: 'GARRAFA', label: '🥤 Garrafas/Copos' },
+  { valor: 'OUTRO', label: '📦 Outros' },
+];
+
 export default function Inicio() {
   const { usuario } = useAuth();
   const [itens, setItens] = useState([]);
@@ -120,39 +132,77 @@ export default function Inicio() {
         </button>
       </div>
 
-      {/* ═══════════════ BUSCA ═══════════════ */}
-      <form onSubmit={handleBusca} className="mb-8">
-        <div className="flex items-center bg-white rounded-2xl border border-slate-100 shadow-sm focus-within:border-primary-300 focus-within:shadow-lg focus-within:shadow-primary-100/30 transition-all">
-          <div className="pl-6 text-slate-400">
+      {/* ═══════════════ BUSCA E FILTROS ═══════════════ */}
+      <div className="mt-10 mb-10 space-y-6">
+        <form onSubmit={handleBusca} className="relative group">
+          <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-500 transition-colors">
             <Search size={22} />
           </div>
           <input
             type="text"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            placeholder="Pesquisar por chaves, blusa azul, caderno..."
-            className="flex-1 bg-transparent py-4.5 px-4 text-base text-slate-700 font-medium focus:outline-none placeholder:text-slate-300"
+            placeholder="Pesquisar itens..."
+            className="w-full bg-white rounded-2xl border border-slate-100 py-4 pl-16 pr-28 text-sm md:text-base text-slate-700 font-medium shadow-sm focus:outline-none focus:border-primary-300 focus:shadow-lg focus:shadow-primary-100/30 transition-all placeholder:text-slate-300"
           />
-          <div className="pr-3">
-            <button 
-              type="button"
-              className="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-primary-50 hover:text-primary-500 transition-colors"
+          <button 
+            type="submit"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary-500 hover:bg-primary-600 text-white px-5 py-2 rounded-xl font-bold text-xs md:text-sm transition-all shadow-md shadow-primary-500/20"
+          >
+            Buscar
+          </button>
+        </form>
+
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center bg-white p-1 rounded-2xl border border-slate-100 shadow-sm w-full overflow-x-auto no-scrollbar">
+            {[
+              { id: '', label: 'Todos' },
+              { id: 'ENCONTRADO', label: 'Achados' },
+              { id: 'PERDIDO', label: 'Perdidos' }
+            ].map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setFiltroTipo(t.id)}
+                className={`flex-1 min-w-fit px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  filtroTipo === t.id 
+                    ? 'bg-primary-500 text-white shadow-md' 
+                    : 'text-slate-500 hover:bg-slate-50'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex gap-2">
+            <select
+              value={filtroCategoria}
+              onChange={(e) => setFiltroCategoria(e.target.value)}
+              className="flex-1 bg-white border border-slate-100 rounded-2xl px-4 py-3 text-xs font-bold text-slate-600 shadow-sm focus:outline-none focus:border-primary-300 transition-all cursor-pointer appearance-none"
             >
-              <Filter size={18} />
+              {CATEGORIAS.map(cat => (
+                <option key={cat.valor} value={cat.valor}>{cat.label}</option>
+              ))}
+            </select>
+            
+            <button 
+              onClick={() => { setBusca(''); setFiltroTipo(''); setFiltroCategoria(''); carregarItens(); }}
+              className="bg-slate-100 text-slate-400 px-4 py-3 rounded-2xl font-bold text-xs hover:text-primary-500 transition-colors"
+            >
+              Limpar
             </button>
           </div>
         </div>
-      </form>
+      </div>
 
       {/* ═══════════════ LISTAGEM RECENTES ═══════════════ */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 mt-12">
         <div>
-          <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">Itens Recentes</h2>
-          <p className="text-sm text-slate-400 mt-1">Últimos objetos cadastrados no sistema</p>
+          <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 tracking-tight">
+            {filtroTipo === 'ENCONTRADO' ? 'Itens Encontrados' : filtroTipo === 'PERDIDO' ? 'Itens Perdidos' : 'Itens Recentes'}
+          </h2>
+          <p className="text-xs md:text-sm text-slate-400 mt-1">Exibindo os últimos registros do sistema</p>
         </div>
-        <button className="text-sm font-bold text-primary-500 hover:text-primary-600 bg-primary-50 hover:bg-primary-100 px-5 py-2.5 rounded-xl transition-colors">
-          Ver todos
-        </button>
       </div>
 
       {carregando ? (
@@ -176,7 +226,7 @@ export default function Inicio() {
               Cadastrar item
             </button>
             <button 
-              onClick={() => { setBusca(''); carregarItens(); }}
+              onClick={() => { setBusca(''); setFiltroTipo(''); setFiltroCategoria(''); carregarItens(); }}
               className="bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors"
             >
               Limpar filtros
@@ -184,7 +234,7 @@ export default function Inicio() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
           {itens.map((item) => (
             <CartaoItem key={item.id} item={item} onClick={(i) => navigate(`/item/${i.id}`)} />
           ))}

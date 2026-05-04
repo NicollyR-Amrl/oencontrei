@@ -113,12 +113,21 @@ export default function BarraNavegacao() {
             className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-primary-50 transition-colors group mb-2"
           >
             <div className="relative shrink-0">
-              <div
-                className="rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold shadow-md"
-                style={{ width: '40px', height: '40px', fontSize: '14px' }}
-              >
-                {usuario?.nome?.charAt(0)?.toUpperCase()}
-              </div>
+              {usuario?.avatar ? (
+                <img 
+                  src={usuario.avatar} 
+                  alt={usuario.nome} 
+                  className="rounded-full object-cover shadow-md"
+                  style={{ width: '40px', height: '40px' }}
+                />
+              ) : (
+                <div
+                  className="rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold shadow-md"
+                  style={{ width: '40px', height: '40px', fontSize: '14px' }}
+                >
+                  {usuario?.nome?.charAt(0)?.toUpperCase()}
+                </div>
+              )}
               {naoLidas > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full flex items-center justify-center border-2 border-white" style={{ width: '18px', height: '18px', fontSize: '9px', fontWeight: 700 }}>
                   {naoLidas > 9 ? '9+' : naoLidas}
@@ -151,7 +160,27 @@ export default function BarraNavegacao() {
           <MobileLink to="/encontrei" icon={PlusCircle} label="Achei" />
           <MobileLink to="/matches" icon={Handshake} label="Match" />
           <MobileLink to="/chat" icon={MessageCircle} label="Chat" />
-          <MobileLink to="/perfil" icon={User} label="Perfil" />
+          <NavLink
+            to="/perfil"
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center gap-0.5 flex-1 py-2 transition-colors ${
+                isActive ? 'text-primary-600' : 'text-slate-400'
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <div className={`p-1 rounded-lg ${isActive ? 'bg-primary-50' : ''}`}>
+                  {usuario?.avatar ? (
+                    <img src={usuario.avatar} alt="Perfil" className="w-5 h-5 rounded-full object-cover" />
+                  ) : (
+                    <User size={20} strokeWidth={isActive ? 2.5 : 1.8} />
+                  )}
+                </div>
+                <span className={`text-[10px] ${isActive ? 'font-bold' : 'font-medium'}`}>Perfil</span>
+              </>
+            )}
+          </NavLink>
         </div>
       </nav>
     </>
