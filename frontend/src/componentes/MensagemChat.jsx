@@ -11,11 +11,11 @@ export default function MensagemChat({ mensagem }) {
       <div className={`max-w-[75%] md:max-w-[60%] ${
         ehMinha
           ? 'gradient-primary rounded-2xl rounded-br-md text-white'
-          : 'bg-fundo-card border border-borda rounded-2xl rounded-bl-md'
+          : 'bg-white border border-borda rounded-2xl rounded-bl-md shadow-sm'
       } px-4 py-3`}>
         {/* Nome do remetente (se não for minha) */}
         {!ehMinha && mensagem.remetente && (
-          <p className="text-xs text-primary-400 font-semibold mb-1">
+          <p className="text-xs text-primary-600 font-semibold mb-1">
             {mensagem.remetente.nome}
           </p>
         )}

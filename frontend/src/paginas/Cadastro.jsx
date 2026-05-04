@@ -45,11 +45,11 @@ export default function Cadastro() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 w-full">
+    <div className="min-h-screen flex items-center justify-center p-4 w-full bg-gradient-to-br from-primary-50 via-white to-secondary-50">
       {/* Fundo decorativo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-secondary-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/3 left-1/4 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-secondary-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/3 left-1/4 w-96 h-96 bg-primary-200/30 rounded-full blur-3xl"></div>
       </div>
 
       <div className="w-full max-w-md animate-slide-up relative z-10">
@@ -60,11 +60,11 @@ export default function Cadastro() {
         </div>
 
         {/* Card de cadastro */}
-        <div className="glass-strong rounded-2xl p-8">
-          <h2 className="text-xl font-bold mb-6 text-center">Criar conta</h2>
+        <div className="bg-white rounded-2xl p-8 shadow-lg border border-primary-100/50">
+          <h2 className="text-xl font-bold mb-6 text-center text-texto-primario">Criar conta</h2>
 
           {erro && (
-            <div className="bg-perigo-500/10 border border-perigo-500/30 text-perigo-400 px-4 py-3 rounded-xl mb-4 text-sm">
+            <div className="bg-perigo-500/10 border border-perigo-500/30 text-perigo-500 px-4 py-3 rounded-xl mb-4 text-sm">
               {erro}
             </div>
           )}
@@ -105,7 +105,7 @@ export default function Cadastro() {
                   placeholder="Mínimo 6 caracteres" className="input-field pr-10" required
                 />
                 <button type="button" onClick={() => setMostrarSenha(!mostrarSenha)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-texto-secundario hover:text-primary-400 transition-colors">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-texto-secundario hover:text-primary-500 transition-colors">
                   {mostrarSenha ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
@@ -135,7 +135,7 @@ export default function Cadastro() {
 
           <p className="text-center text-texto-secundario text-sm mt-6">
             Já tem conta?{' '}
-            <Link to="/login" className="text-primary-400 hover:text-primary-300 font-semibold transition-colors">
+            <Link to="/login" className="text-primary-500 hover:text-primary-700 font-semibold transition-colors">
               Entrar
             </Link>
           </p>

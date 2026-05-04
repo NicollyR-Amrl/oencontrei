@@ -127,10 +127,10 @@ export default function Chat() {
   return (
     <div className="animate-fade-in h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)] flex flex-col md:flex-row gap-4">
       {/* Lista de conversas */}
-      <div className={`${contatoAtivo ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-80 glass-strong rounded-2xl overflow-hidden`}>
+      <div className={`${contatoAtivo ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-80 bg-white rounded-2xl overflow-hidden border border-borda shadow-sm`}>
         <div className="p-4 border-b border-borda">
           <h2 className="font-bold text-lg flex items-center gap-2">
-            <MessageCircle size={20} className="text-primary-400" /> Conversas
+            <MessageCircle size={20} className="text-primary-500" /> Conversas
           </h2>
         </div>
         <div className="flex-1 overflow-y-auto">
@@ -143,8 +143,8 @@ export default function Chat() {
               <button
                 key={conversa.usuario.id}
                 onClick={() => setContatoAtivo(conversa.usuario.id)}
-                className={`w-full flex items-center gap-3 p-4 hover:bg-fundo-card-hover transition-all text-left ${
-                  contatoAtivo === conversa.usuario.id ? 'bg-primary-500/10 border-l-2 border-primary-500' : ''
+                className={`w-full flex items-center gap-3 p-4 hover:bg-primary-50 transition-all text-left ${
+                  contatoAtivo === conversa.usuario.id ? 'bg-primary-50 border-l-3 border-primary-500' : ''
                 }`}
               >
                 <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-sm font-bold text-white shrink-0">
@@ -170,14 +170,14 @@ export default function Chat() {
       </div>
 
       {/* Área de chat */}
-      <div className={`${!contatoAtivo ? 'hidden md:flex' : 'flex'} flex-1 flex-col glass-strong rounded-2xl overflow-hidden`}>
+      <div className={`${!contatoAtivo ? 'hidden md:flex' : 'flex'} flex-1 flex-col bg-white rounded-2xl overflow-hidden border border-borda shadow-sm`}>
         {contatoAtivo ? (
           <>
             {/* Header do chat */}
-            <div className="flex items-center gap-3 p-4 border-b border-borda">
+            <div className="flex items-center gap-3 p-4 border-b border-borda bg-primary-50/50">
               <button
                 onClick={() => setContatoAtivo(null)}
-                className="md:hidden text-texto-secundario hover:text-primary-400 transition-colors"
+                className="md:hidden text-texto-secundario hover:text-primary-600 transition-colors"
               >
                 <ArrowLeft size={20} />
               </button>
@@ -187,13 +187,13 @@ export default function Chat() {
               <div>
                 <p className="font-semibold">{contatoInfo?.nome || 'Usuário'}</p>
                 {digitando && (
-                  <p className="text-xs text-primary-400 animate-pulse">digitando...</p>
+                  <p className="text-xs text-primary-500 animate-pulse">digitando...</p>
                 )}
               </div>
             </div>
 
             {/* Mensagens */}
-            <div ref={mensagensRef} className="flex-1 overflow-y-auto p-4 space-y-1">
+            <div ref={mensagensRef} className="flex-1 overflow-y-auto p-4 space-y-1 bg-gradient-to-b from-primary-50/30 to-white">
               {mensagens.length === 0 ? (
                 <div className="text-center py-10 text-texto-secundario text-sm">
                   Nenhuma mensagem ainda. Diga olá! 👋
@@ -206,7 +206,7 @@ export default function Chat() {
             </div>
 
             {/* Input de mensagem */}
-            <form onSubmit={enviarMensagem} className="p-4 border-t border-borda">
+            <form onSubmit={enviarMensagem} className="p-4 border-t border-borda bg-white">
               <div className="flex gap-2">
                 <input
                   ref={inputRef}
@@ -232,7 +232,7 @@ export default function Chat() {
         ) : (
           <div className="flex-1 flex items-center justify-center text-texto-secundario">
             <div className="text-center">
-              <MessageCircle size={48} className="mx-auto mb-3 opacity-30" />
+              <MessageCircle size={48} className="mx-auto mb-3 text-primary-200" />
               <p>Selecione uma conversa para começar</p>
             </div>
           </div>

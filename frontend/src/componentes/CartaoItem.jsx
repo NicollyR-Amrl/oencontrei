@@ -1,11 +1,11 @@
 // CartaoItem — Card de item perdido/encontrado
 
-import { MapPin, Calendar, Tag, User } from 'lucide-react';
+import { MapPin, Calendar, Tag } from 'lucide-react';
 
 const CATEGORIAS_LABELS = {
   ELETRONICO: '📱 Eletrônico',
   ROUPA: '👕 Roupa',
-  MATERIAL_ESCOLAR: '📚 Material Escolar',
+  MATERIAL_ESCOLAR: '📚 Material',
   ACESSORIO: '💍 Acessório',
   DOCUMENTO: '📄 Documento',
   CHAVE: '🔑 Chave',
@@ -19,10 +19,10 @@ export default function CartaoItem({ item, onClick }) {
   return (
     <div
       onClick={() => onClick?.(item)}
-      className="card cursor-pointer group animate-fade-in"
+      className="group bg-white rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1"
     >
       {/* Imagem */}
-      <div className="relative mb-4 rounded-lg overflow-hidden bg-fundo-escuro aspect-video">
+      <div className="relative h-44 overflow-hidden bg-slate-50">
         {item.imagem ? (
           <img
             src={item.imagem}
@@ -30,53 +30,56 @@ export default function CartaoItem({ item, onClick }) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-4xl">
-            {ehPerdido ? '❓' : '✅'}
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-50 to-slate-50">
+            <span className="text-5xl">{ehPerdido ? '🔍' : '✅'}</span>
           </div>
         )}
-        {/* Badge tipo */}
-        <span className={`absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-bold ${
+
+        {/* Badge */}
+        <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm ${
           ehPerdido
-            ? 'bg-perigo-500/90 text-white'
-            : 'bg-acento-500/90 text-white'
+            ? 'bg-rose-500 text-white'
+            : 'bg-emerald-500 text-white'
         }`}>
-          {ehPerdido ? 'PERDIDO' : 'ENCONTRADO'}
-        </span>
-      </div>
-
-      {/* Info */}
-      <h3 className="font-bold text-lg mb-2 group-hover:text-primary-400 transition-colors truncate">
-        {item.titulo}
-      </h3>
-      <p className="text-texto-secundario text-sm mb-3 line-clamp-2">
-        {item.descricao}
-      </p>
-
-      {/* Metadados */}
-      <div className="space-y-2 text-sm text-texto-secundario">
-        <div className="flex items-center gap-2">
-          <Tag size={14} className="text-primary-400" />
-          <span>{CATEGORIAS_LABELS[item.categoria] || item.categoria}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <MapPin size={14} className="text-primary-400" />
-          <span className="truncate">{item.local}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Calendar size={14} className="text-primary-400" />
-          <span>{new Date(item.criadoEm || item.data).toLocaleDateString('pt-BR')}</span>
+          {ehPerdido ? 'Perdido' : 'Encontrado'}
         </div>
       </div>
 
-      {/* Rodapé — Usuário */}
-      {item.usuario && (
-        <div className="flex items-center gap-2 mt-4 pt-3 border-t border-borda">
-          <div className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center text-xs font-bold text-white">
-            {item.usuario.nome?.charAt(0)?.toUpperCase()}
+      {/* Content */}
+      <div className="p-4">
+        <h3 className="font-bold text-base text-slate-800 mb-1 truncate group-hover:text-primary-600 transition-colors">
+          {item.titulo}
+        </h3>
+        <p className="text-slate-400 text-xs mb-3 line-clamp-2 leading-relaxed">
+          {item.descricao}
+        </p>
+
+        {/* Meta tags */}
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-primary-50 text-primary-600 text-[10px] font-semibold">
+            <Tag size={10} />
+            {CATEGORIAS_LABELS[item.categoria] || item.categoria}
+          </span>
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-slate-50 text-slate-500 text-[10px] font-semibold">
+            <MapPin size={10} />
+            <span className="truncate max-w-[80px]">{item.local}</span>
+          </span>
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-slate-50 text-slate-500 text-[10px] font-semibold">
+            <Calendar size={10} />
+            {new Date(item.criadoEm || item.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+          </span>
+        </div>
+
+        {/* Author */}
+        {item.usuario && (
+          <div className="flex items-center gap-2 pt-3 border-t border-slate-50">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-[9px] font-bold text-white">
+              {item.usuario.nome?.charAt(0)?.toUpperCase()}
+            </div>
+            <span className="text-xs text-slate-400 font-medium">{item.usuario.nome}</span>
           </div>
-          <span className="text-sm text-texto-secundario">{item.usuario.nome}</span>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
