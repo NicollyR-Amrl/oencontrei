@@ -40,14 +40,14 @@ export default function AdminDashboard() {
 
   return (
     <div className="animate-fade-in">
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-8">
         {cards.map((s) => (
-          <div key={s.label} className="card text-center flex flex-col items-center justify-center p-6">
-            <div className={`w-14 h-14 rounded-xl mb-4 flex items-center justify-center ${s.corBg}`}>
-              <s.icone size={28} className={s.corIcone} />
+          <div key={s.label} className="card text-center flex flex-col items-center justify-center p-4 sm:p-6">
+            <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl mb-3 sm:mb-4 flex items-center justify-center ${s.corBg}`}>
+              <s.icone className={`w-6 h-6 sm:w-7 sm:h-7 ${s.corIcone}`} />
             </div>
-            <p className="text-3xl font-extrabold text-texto-primario mb-1">{s.valor}</p>
-            <p className="text-xs font-semibold text-texto-secundario uppercase tracking-wider">{s.label}</p>
+            <p className="text-2xl sm:text-3xl font-extrabold text-texto-primario mb-1">{s.valor}</p>
+            <p className="text-[10px] sm:text-xs font-semibold text-texto-secundario uppercase tracking-wider">{s.label}</p>
           </div>
         ))}
       </div>

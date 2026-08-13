@@ -64,6 +64,8 @@ export default function DetalhesItem() {
   if (!item) return null;
 
   const ehDono = usuario?.id === item.usuarioId;
+  const ehAdmin = usuario?.cargo === 'ADMIN';
+  const podeGerenciar = ehDono || ehAdmin;
   const ehPerdido = item.tipo === 'PERDIDO';
 
   return (
@@ -71,7 +73,7 @@ export default function DetalhesItem() {
       {/* Botão Voltar */}
       <button 
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-slate-500 hover:text-primary-600 font-bold mb-6 transition-colors group"
+        className="flex items-center gap-2 text-slate-500 hover:text-primary-600 font-bold mb-6 transition-colors group cursor-pointer"
       >
         <div className="w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center shadow-sm group-hover:shadow-md group-hover:border-primary-100 transition-all">
           <ChevronLeft size={20} />
@@ -117,7 +119,7 @@ export default function DetalhesItem() {
               </div>
               
               <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-6">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-sm font-black text-white shadow-md">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-sm font-black text-white shadow-md shrink-0">
                   {item.usuario?.nome?.charAt(0)?.toUpperCase()}
                 </div>
                 <div>
@@ -128,6 +130,9 @@ export default function DetalhesItem() {
                 </div>
                 {ehDono && (
                   <span className="ml-auto bg-primary-100 text-primary-600 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Meu Post</span>
+                )}
+                {ehAdmin && !ehDono && (
+                  <span className="ml-auto bg-purple-100 text-purple-700 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">🛡️ Admin</span>
                 )}
               </div>
 
@@ -161,26 +166,36 @@ export default function DetalhesItem() {
 
             {/* Ações */}
             <div className="flex flex-col sm:flex-row gap-4">
-              {ehDono ? (
+              {podeGerenciar ? (
                 <>
                   <button 
                     onClick={() => navigate(`/editar-item/${item.id}`)}
-                    className="flex-1 bg-slate-800 text-white hover:bg-slate-900 px-8 py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-slate-200 transition-all active:scale-95"
+                    className="flex-1 bg-slate-800 text-white hover:bg-slate-900 px-6 py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-slate-200 transition-all active:scale-95 cursor-pointer"
                   >
                     <Edit3 size={18} /> Editar Publicação
                   </button>
                   <button 
                     onClick={handleDeletar}
-                    className="bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white px-6 py-4 rounded-2xl font-black text-sm border border-rose-100 transition-all active:scale-95"
+                    className="bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white px-6 py-4 rounded-2xl font-black text-sm border border-rose-100 transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                    title="Excluir este item"
                   >
                     <Trash2 size={18} />
+                    {ehAdmin && !ehDono && <span className="text-xs font-bold">Excluir (Admin)</span>}
                   </button>
+                  {!ehDono && (
+                    <button 
+                      onClick={() => navigate(`/chat/${item.usuarioId}`)}
+                      className="bg-primary-500 text-white hover:bg-primary-600 px-6 py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer"
+                    >
+                      <MessageCircle size={18} /> Chat
+                    </button>
+                  )}
                 </>
               ) : (
                 <>
                   <button 
                     onClick={() => navigate(`/chat/${item.usuarioId}`)}
-                    className="flex-1 bg-primary-500 text-white hover:bg-primary-600 px-8 py-5 rounded-2xl font-black text-base flex items-center justify-center gap-3 shadow-xl shadow-primary-500/30 transition-all active:scale-95"
+                    className="flex-1 bg-primary-500 text-white hover:bg-primary-600 px-8 py-5 rounded-2xl font-black text-base flex items-center justify-center gap-3 shadow-xl shadow-primary-500/30 transition-all active:scale-95 cursor-pointer"
                   >
                     <MessageCircle size={22} /> Falar com {item.usuario?.nome?.split(' ')[0]}
                   </button>

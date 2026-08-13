@@ -11,11 +11,19 @@ const api = axios.create({
   }
 });
 
-// Interceptor: adicionar token JWT automaticamente
+// Interceptor: adicionar token JWT e tratar FormData automaticamente
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('encontrei_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  
+  // Se for FormData, remove o Content-Type padrão para o Axios definir multipart/form-data com boundary
+  if (config.data instanceof FormData) {
+    if (config.headers) {
+      delete config.headers['Content-Type'];
+      delete config.headers['content-type'];
+    }
   }
   return config;
 });

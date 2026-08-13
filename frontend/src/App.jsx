@@ -16,11 +16,13 @@ const Matches = lazy(() => import('./paginas/Matches'));
 const Chat = lazy(() => import('./paginas/Chat'));
 const Perfil = lazy(() => import('./paginas/Perfil'));
 const DetalhesItem = lazy(() => import('./paginas/DetalhesItem'));
+const EditarItem = lazy(() => import('./paginas/EditarItem'));
 
 // Admin e suas sub-rotas
 const Admin = lazy(() => import('./paginas/Admin'));
 const AdminDashboard = lazy(() => import('./paginas/admin/AdminDashboard'));
 const AdminItens = lazy(() => import('./paginas/admin/AdminItens'));
+const AdminUsuarios = lazy(() => import('./paginas/admin/AdminUsuarios'));
 
 // Componente de Loading Premium
 const LoadingScreen = () => (
@@ -56,13 +58,14 @@ export default function App() {
             <Route path="/chat/:usuarioId" element={<Chat />} />
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/item/:id" element={<DetalhesItem />} />
+            <Route path="/editar-item/:id" element={<EditarItem />} />
             
             {/* Admin com Roteamento Aninhado */}
             <Route path="/admin" element={<Admin />}>
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="itens" element={<AdminItens />} />
-              <Route path="usuarios" element={<div className="card text-center py-10 text-texto-secundario">Gerenciamento de Usuários em breve...</div>} />
+              <Route path="usuarios" element={<AdminUsuarios />} />
               <Route path="configuracoes" element={<div className="card text-center py-10 text-texto-secundario">Configurações do Sistema em breve...</div>} />
             </Route>
           </Route>

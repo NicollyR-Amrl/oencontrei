@@ -131,4 +131,112 @@ const estatisticas = async (req, res) => {
   }
 };
 
-module.exports = { listarTodosItens, marcarDevolvido, deletarItemAdmin, estatisticas };
+/**
+ * Listar todos os usuários (admin)
+ * GET /api/admin/usuarios
+ */
+const listarUsuarios = async (req, res) => {
+  try {
+    const { busca = '', pagina = 1, limite = 20 } = req.query;
+    const skip = (parseInt(pagina) - 1) * parseInt(limite);
+
+    const where = busca
+      ? {
+          OR: [
+            { nome: { contains: busca, mode: 'insensitive' } },
+            { email: { contains: busca, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
+    const [usuarios, total] = await Promise.all([
+      prisma.usuario.findMany({
+        where,
+        select: {
+          id: true,
+          nome: true,
+          email: true,
+          turma: true,
+          cargo: true,
+          reputacao: true,
+          avatar: true,
+          criadoEm: true,
+          _count: { select: { itens: true } },
+        },
+        orderBy: { criadoEm: 'desc' },
+        skip,
+        take: parseInt(limite),
+      }),
+      prisma.usuario.count({ where }),
+    ]);
+
+    res.json({
+      sucesso: true,
+      usuarios,
+      paginacao: {
+        pagina: parseInt(pagina),
+        limite: parseInt(limite),
+        total,
+        totalPaginas: Math.ceil(total / parseInt(limite)),
+      },
+    });
+  } catch (erro) {
+    console.error('Erro ao listar usuários (admin):', erro);
+    res.status(500).json({ erro: true, mensagem: 'Erro ao listar usuários' });
+  }
+};
+
+/**
+ * Alterar cargo do usuário (admin)
+ * PUT /api/admin/usuarios/:id/cargo
+ */
+const alterarCargo = async (req, res) => {
+  try {
+    const { cargo } = req.body;
+    const cargosValidos = ['ALUNO', 'PROFESSOR', 'FUNCIONARIO', 'ADMIN'];
+    if (!cargosValidos.includes(cargo)) {
+      return res.status(400).json({ erro: true, mensagem: 'Cargo inválido' });
+    }
+    // Não pode alterar o próprio cargo
+    if (req.params.id === req.usuario.id) {
+      return res.status(400).json({ erro: true, mensagem: 'Você não pode alterar seu próprio cargo' });
+    }
+    const usuario = await prisma.usuario.update({
+      where: { id: req.params.id },
+      data: { cargo },
+      select: { id: true, nome: true, email: true, cargo: true },
+    });
+    res.json({ sucesso: true, mensagem: 'Cargo atualizado com sucesso!', usuario });
+  } catch (erro) {
+    console.error('Erro ao alterar cargo:', erro);
+    res.status(500).json({ erro: true, mensagem: 'Erro ao alterar cargo' });
+  }
+};
+
+/**
+ * Deletar usuário (admin)
+ * DELETE /api/admin/usuarios/:id
+ */
+const deletarUsuario = async (req, res) => {
+  try {
+    if (req.params.id === req.usuario.id) {
+      return res.status(400).json({ erro: true, mensagem: 'Você não pode deletar sua própria conta' });
+    }
+    // Deletar dependências na ordem correta
+    const itens = await prisma.item.findMany({ where: { usuarioId: req.params.id }, select: { id: true } });
+    const itemIds = itens.map(i => i.id);
+    if (itemIds.length > 0) {
+      await prisma.match.deleteMany({ where: { OR: [{ itemPerdidoId: { in: itemIds } }, { itemEncontradoId: { in: itemIds } }] } });
+    }
+    await prisma.item.deleteMany({ where: { usuarioId: req.params.id } });
+    await prisma.mensagem.deleteMany({ where: { OR: [{ remetenteId: req.params.id }, { destinatarioId: req.params.id }] } });
+    await prisma.notificacao.deleteMany({ where: { usuarioId: req.params.id } });
+    await prisma.usuario.delete({ where: { id: req.params.id } });
+    res.json({ sucesso: true, mensagem: 'Usuário removido com sucesso' });
+  } catch (erro) {
+    console.error('Erro ao deletar usuário (admin):', erro);
+    res.status(500).json({ erro: true, mensagem: 'Erro ao deletar usuário' });
+  }
+};
+
+module.exports = { listarTodosItens, marcarDevolvido, deletarItemAdmin, estatisticas, listarUsuarios, alterarCargo, deletarUsuario };

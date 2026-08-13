@@ -31,9 +31,7 @@ export default function EditarItem() {
   const handleSubmit = async (formData) => {
     setSalvando(true);
     try {
-      await api.put(`/itens/${id}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await api.put(`/itens/${id}`, formData);
       setSucesso(true);
       setTimeout(() => navigate('/'), 2000);
     } catch (err) {

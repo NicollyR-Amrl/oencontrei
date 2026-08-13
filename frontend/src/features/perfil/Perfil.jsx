@@ -12,7 +12,12 @@ export default function Perfil() {
   const { notificacoes, naoLidas, marcarComoLida, marcarTodasComoLidas } = useNotificacoes();
   const [abaAtiva, setAbaAtiva] = useState('perfil');
   const [editando, setEditando] = useState(false);
-  const [form, setForm] = useState({ nome: usuario?.nome || '', turma: usuario?.turma || '' });
+  const [form, setForm] = useState({ 
+    nome: usuario?.nome || '', 
+    turma: usuario?.turma || '',
+    senha: '',
+    confirmarSenha: ''
+  });
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [avatarFile, setAvatarFile] = useState(null);
   const fileInputRef = useRef(null);
@@ -26,12 +31,24 @@ export default function Perfil() {
   };
 
   const salvar = async () => {
+    if (form.senha && form.senha !== form.confirmarSenha) {
+      return alert('As senhas não coincidem');
+    }
+
     try {
       const formData = new FormData();
       formData.append('nome', form.nome);
       formData.append('turma', form.turma);
+      if (form.senha) {
+        formData.append('senha', form.senha);
+      }
       if (avatarFile) {
         formData.append('avatar', avatarFile);
+      }
+
+      console.log('Enviando atualização de perfil (features)...');
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${key === 'senha' ? '***' : value}`);
       }
 
       const res = await api.put('/autenticacao/perfil', formData, {
@@ -42,6 +59,8 @@ export default function Perfil() {
       setEditando(false);
       setAvatarFile(null);
       setAvatarPreview(null);
+      setForm(p => ({ ...p, senha: '', confirmarSenha: '' }));
+      alert('Perfil atualizado com sucesso!');
     } catch (e) { 
       console.error(e);
       alert('Erro ao atualizar'); 
@@ -161,13 +180,42 @@ export default function Perfil() {
             <div className="space-y-4">
               <div><label className="block text-sm text-texto-secundario mb-2">Nome</label><input type="text" value={form.nome} onChange={e => setForm(p => ({ ...p, nome: e.target.value }))} className="input-field" /></div>
               <div><label className="block text-sm text-texto-secundario mb-2">Turma</label><input type="text" value={form.turma} onChange={e => setForm(p => ({ ...p, turma: e.target.value }))} className="input-field" /></div>
-              <div className="flex gap-3">
+              
+              <div className="pt-4 border-t border-borda mt-4">
+                <p className="text-xs font-bold text-primary-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-primary-500 rounded-full animate-pulse"></span>
+                  Alterar Senha (Opcional)
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-texto-secundario mb-2">Nova Senha</label>
+                    <input 
+                      type="password" 
+                      value={form.senha} 
+                      onChange={e => setForm(p => ({ ...p, senha: e.target.value }))} 
+                      placeholder="Deixe em branco para manter"
+                      className="input-field" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-texto-secundario mb-2">Confirmar Nova Senha</label>
+                    <input 
+                      type="password" 
+                      value={form.confirmarSenha} 
+                      onChange={e => setForm(p => ({ ...p, confirmarSenha: e.target.value }))} 
+                      className="input-field" 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-6">
                 <button onClick={salvar} className="btn-primary">Salvar Alterações</button>
                 <button onClick={() => {
                   setEditando(false);
                   setAvatarPreview(null);
                   setAvatarFile(null);
-                  setForm({ nome: usuario?.nome || '', turma: usuario?.turma || '' });
+                  setForm({ nome: usuario?.nome || '', turma: usuario?.turma || '', senha: '', confirmarSenha: '' });
                 }} className="btn-secondary">Cancelar</button>
               </div>
             </div>

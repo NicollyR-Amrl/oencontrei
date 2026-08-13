@@ -14,9 +14,7 @@ export default function CadastroItemEncontrado() {
   const handleSubmit = async (formData) => {
     setCarregando(true);
     try {
-      await api.post('/itens', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await api.post('/itens', formData);
       setSucesso(true);
       setTimeout(() => navigate('/'), 2000);
     } catch (err) {

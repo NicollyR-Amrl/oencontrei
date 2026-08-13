@@ -69,6 +69,23 @@ export function AuthProvider({ children }) {
     setUsuario(prev => ({ ...prev, ...dadosAtualizados }));
   };
 
+  const aceitarTermos = async () => {
+    try {
+      const res = await api.post('/autenticacao/termos');
+      if (res.data.sucesso) {
+        setUsuario(prev => {
+          const novoUsuario = { ...prev, termosAceitos: true };
+          localStorage.setItem('encontrei_usuario', JSON.stringify(novoUsuario));
+          return novoUsuario;
+        });
+        return true;
+      }
+    } catch (error) {
+      console.error('Erro ao aceitar os termos:', error);
+      return false;
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       usuario,
@@ -78,6 +95,7 @@ export function AuthProvider({ children }) {
       registrar,
       logout,
       atualizarUsuario,
+      aceitarTermos,
       autenticado: !!usuario
     }}>
       {children}

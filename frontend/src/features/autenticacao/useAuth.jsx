@@ -77,6 +77,23 @@ export const useAuth = create((set, get) => ({
 
   atualizarUsuario: (dadosAtualizados) => {
     set((state) => ({ usuario: { ...state.usuario, ...dadosAtualizados } }));
+  },
+
+  aceitarTermos: async () => {
+    try {
+      const res = await api.post('/autenticacao/termos');
+      if (res.data.sucesso) {
+        set((state) => {
+          const novoUsuario = { ...state.usuario, termosAceitos: true };
+          localStorage.setItem('encontrei_usuario', JSON.stringify(novoUsuario));
+          return { usuario: novoUsuario };
+        });
+        return true;
+      }
+    } catch (error) {
+      console.error('Erro ao aceitar os termos:', error);
+      return false;
+    }
   }
 }));
 

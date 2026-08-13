@@ -31,7 +31,7 @@ const registrar = async (req, res) => {
       },
       select: {
         id: true, nome: true, email: true,
-        turma: true, cargo: true, reputacao: true, avatar: true, criadoEm: true
+        turma: true, cargo: true, reputacao: true, avatar: true, criadoEm: true, termosAceitos: true
       }
     });
 
@@ -78,7 +78,8 @@ const login = async (req, res) => {
       usuario: {
         id: usuario.id, nome: usuario.nome, email: usuario.email,
         turma: usuario.turma, cargo: usuario.cargo,
-        reputacao: usuario.reputacao, avatar: usuario.avatar
+        reputacao: usuario.reputacao, avatar: usuario.avatar,
+        termosAceitos: usuario.termosAceitos
       },
       token
     });
@@ -98,7 +99,7 @@ const perfil = async (req, res) => {
       where: { id: req.usuario.id },
       select: {
         id: true, nome: true, email: true, turma: true,
-        cargo: true, reputacao: true, avatar: true, criadoEm: true,
+        cargo: true, reputacao: true, avatar: true, criadoEm: true, termosAceitos: true,
         itens: {
           select: { id: true, titulo: true, tipo: true, status: true, criadoEm: true },
           orderBy: { criadoEm: 'desc' }
@@ -119,10 +120,14 @@ const perfil = async (req, res) => {
  */
 const atualizarPerfil = async (req, res) => {
   try {
-    const { nome, turma, removerAvatar } = req.body;
+    const { nome, turma, senha, removerAvatar } = req.body;
     const dados = {};
     if (nome) dados.nome = nome;
     if (turma !== undefined) dados.turma = turma;
+    
+    if (senha) {
+      dados.senha = await bcrypt.hash(senha, 12);
+    }
     
     if (removerAvatar === 'true') {
       dados.avatar = null;
@@ -135,7 +140,7 @@ const atualizarPerfil = async (req, res) => {
       data: dados,
       select: {
         id: true, nome: true, email: true,
-        turma: true, cargo: true, reputacao: true, avatar: true
+        turma: true, cargo: true, reputacao: true, avatar: true, termosAceitos: true
       }
     });
 
@@ -169,4 +174,22 @@ const obterUsuario = async (req, res) => {
   }
 };
 
-module.exports = { registrar, login, perfil, atualizarPerfil, obterUsuario };
+/**
+ * Aceitar os termos de uso
+ * POST /api/autenticacao/termos
+ */
+const aceitarTermos = async (req, res) => {
+  try {
+    const usuario = await prisma.usuario.update({
+      where: { id: req.usuario.id },
+      data: { termosAceitos: true },
+      select: { termosAceitos: true }
+    });
+    res.json({ sucesso: true, mensagem: 'Termos de uso aceitos com sucesso!', usuario });
+  } catch (erro) {
+    console.error('Erro ao aceitar termos:', erro);
+    res.status(500).json({ erro: true, mensagem: 'Erro ao aceitar os termos de uso' });
+  }
+};
+
+module.exports = { registrar, login, perfil, atualizarPerfil, obterUsuario, aceitarTermos };

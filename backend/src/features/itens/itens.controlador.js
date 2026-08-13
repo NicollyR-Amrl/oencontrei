@@ -160,6 +160,16 @@ const deletarItem = async (req, res) => {
       return res.status(403).json({ erro: true, mensagem: 'Sem permissão para deletar este item' });
     }
 
+    // Deletar matches associados antes de deletar o item
+    await prisma.match.deleteMany({
+      where: {
+        OR: [
+          { itemPerdidoId: req.params.id },
+          { itemEncontradoId: req.params.id }
+        ]
+      }
+    });
+
     await prisma.item.delete({ where: { id: req.params.id } });
     res.json({ sucesso: true, mensagem: 'Item removido com sucesso!' });
   } catch (erro) {

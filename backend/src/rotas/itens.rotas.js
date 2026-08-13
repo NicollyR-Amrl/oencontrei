@@ -5,16 +5,16 @@ const router = express.Router();
 const { criarItem, listarItens, obterItem, atualizarItem, deletarItem, meusItens } = require('../controladores/itens.controlador');
 const { verificarToken } = require('../middlewares/autenticacao.middleware');
 const { validarItem } = require('../middlewares/validacao.middleware');
-const { upload } = require('../middlewares/upload.middleware');
+const { upload, tratarUploadSingle } = require('../middlewares/upload.middleware');
 
 // Rotas públicas (listagem)
 router.get('/', listarItens);
-router.get('/:id', obterItem);
+router.get('/usuario/meus', verificarToken, meusItens); // deve vir ANTES de /:id
 
 // Rotas protegidas
-router.post('/', verificarToken, upload.single('imagem'), validarItem, criarItem);
-router.put('/:id', verificarToken, upload.single('imagem'), atualizarItem);
+router.post('/', verificarToken, tratarUploadSingle('imagem'), validarItem, criarItem);
+router.put('/:id', verificarToken, tratarUploadSingle('imagem'), atualizarItem);
 router.delete('/:id', verificarToken, deletarItem);
-router.get('/usuario/meus', verificarToken, meusItens);
+router.get('/:id', obterItem);
 
 module.exports = router;

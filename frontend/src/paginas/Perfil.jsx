@@ -1,18 +1,25 @@
 // Perfil — Perfil do usuário, histórico e notificações
 
 import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useNotificacoes } from '../hooks/useNotificacoes';
 import NotificacaoComp from '../componentes/Notificacao';
 import api from '../servicos/api';
-import { Star, Bell, CheckCheck, Settings, Camera, Trash2, LogIn } from 'lucide-react';
+import { Star, Bell, CheckCheck, Settings, Camera, Trash2, LogOut, Shield } from 'lucide-react';
 
 export default function Perfil() {
-  const { usuario, atualizarUsuario } = useAuth();
+  const { usuario, atualizarUsuario, logout } = useAuth();
   const { notificacoes, naoLidas, marcarComoLida, marcarTodasComoLidas } = useNotificacoes();
+  const navigate = useNavigate();
   const [abaAtiva, setAbaAtiva] = useState('perfil');
   const [editando, setEditando] = useState(false);
-  const [form, setForm] = useState({ nome: usuario?.nome || '', turma: usuario?.turma || '' });
+  const [form, setForm] = useState({ 
+    nome: usuario?.nome || '', 
+    turma: usuario?.turma || '',
+    senha: '',
+    confirmarSenha: ''
+  });
   
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -27,24 +34,34 @@ export default function Perfil() {
   };
 
   const salvar = async () => {
+    if (form.senha && form.senha !== form.confirmarSenha) {
+      return alert('As senhas não coincidem');
+    }
+
     try {
       const formData = new FormData();
       formData.append('nome', form.nome);
       formData.append('turma', form.turma);
+      if (form.senha) {
+        formData.append('senha', form.senha);
+      }
       if (avatarFile) {
         formData.append('avatar', avatarFile);
       }
 
-      const res = await api.put('/autenticacao/perfil', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      console.log('Enviando atualização de perfil...');
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${key === 'senha' ? '***' : value}`);
+      }
+
+      const res = await api.put('/autenticacao/perfil', formData);
       
       atualizarUsuario(res.data.usuario);
       setEditando(false);
       setAvatarFile(null);
       setAvatarPreview(null);
+      setForm(p => ({ ...p, senha: '', confirmarSenha: '' }));
+      alert('Perfil atualizado com sucesso!');
     } catch (e) { 
       console.error(e);
       alert('Erro ao atualizar'); 
@@ -139,7 +156,33 @@ export default function Perfil() {
             <div className="space-y-4">
               <div><label className="block text-sm text-texto-secundario mb-2">Nome</label><input type="text" value={form.nome} onChange={e => setForm(p => ({...p, nome: e.target.value}))} className="input-field" /></div>
               <div><label className="block text-sm text-texto-secundario mb-2">Turma</label><input type="text" value={form.turma} onChange={e => setForm(p => ({...p, turma: e.target.value}))} className="input-field" /></div>
-              <div className="flex gap-3"><button onClick={salvar} className="btn-primary">Salvar</button><button onClick={() => setEditando(false)} className="btn-secondary">Cancelar</button></div>
+              
+              <div className="pt-2 border-t border-borda mt-2">
+                <p className="text-xs font-bold text-primary-400 uppercase tracking-widest mb-4">🔐 Alterar Senha (Opcional)</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-texto-secundario mb-2">Nova Senha</label>
+                    <input 
+                      type="password" 
+                      value={form.senha} 
+                      onChange={e => setForm(p => ({...p, senha: e.target.value}))} 
+                      placeholder="Deixe em branco para manter"
+                      className="input-field" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-texto-secundario mb-2">Confirmar Nova Senha</label>
+                    <input 
+                      type="password" 
+                      value={form.confirmarSenha} 
+                      onChange={e => setForm(p => ({...p, confirmarSenha: e.target.value}))} 
+                      className="input-field" 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4"><button onClick={salvar} className="btn-primary">Salvar Alterações</button><button onClick={() => setEditando(false)} className="btn-secondary">Cancelar</button></div>
             </div>
           ) : (
             <div>
@@ -148,7 +191,26 @@ export default function Perfil() {
                   <div key={l} className="bg-primary-50/50 rounded-xl p-4 border border-primary-100"><p className="text-xs text-texto-secundario mb-1">{l}</p><p className="font-semibold text-texto-primario">{v}</p></div>
                 ))}
               </div>
-              <button onClick={() => setEditando(true)} className="btn-secondary"><Settings size={16} /> Editar</button>
+              <div className="flex flex-wrap gap-3">
+                <button onClick={() => setEditando(true)} className="btn-secondary"><Settings size={16} /> Editar</button>
+                {usuario?.cargo === 'ADMIN' && (
+                  <button 
+                    onClick={() => navigate('/admin')} 
+                    className="btn-secondary text-primary-600 border-primary-100 hover:bg-primary-50 hover:text-primary-700 md:hidden flex items-center justify-center gap-2"
+                  >
+                    <Shield size={16} /> Painel Admin
+                  </button>
+                )}
+                <button 
+                  onClick={() => {
+                    logout();
+                    navigate('/login');
+                  }} 
+                  className="btn-secondary text-red-500 border-red-100 hover:bg-red-50 hover:text-red-600 md:hidden flex items-center justify-center gap-2"
+                >
+                  <LogOut size={16} /> Sair da conta
+                </button>
+              </div>
             </div>
           )}
         </div>

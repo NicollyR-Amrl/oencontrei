@@ -41,4 +41,21 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB
 });
 
-module.exports = { upload };
+const tratarUploadSingle = (campo) => {
+  return (req, res, next) => {
+    const uploadSingle = upload.single(campo);
+    uploadSingle(req, res, (err) => {
+      if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ erro: true, mensagem: 'A imagem deve ter no máximo 5MB.' });
+        }
+        return res.status(400).json({ erro: true, mensagem: `Erro no upload de imagem: ${err.message}` });
+      } else if (err) {
+        return res.status(400).json({ erro: true, mensagem: err.message || 'Erro ao processar imagem.' });
+      }
+      next();
+    });
+  };
+};
+
+module.exports = { upload, tratarUploadSingle };
