@@ -1,15 +1,16 @@
-// Serviço de Matching com IA
+// Serviço de Matching com IA (Qwen via OpenRouter)
 // Compara itens perdidos com encontrados e retorna score de compatibilidade
 
 const stringSimilarity = require('string-similarity');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { calcularScoreIA, iaDisponivel } = require('../features/matching/ia.servico');
 
 /**
- * Calcula o score de compatibilidade entre dois itens
+ * Calcula o score BÁSICO de compatibilidade entre dois itens
  * Pesos: texto (40%), categoria (30%), local (30%)
  */
-function calcularScore(itemPerdido, itemEncontrado) {
+function calcularScoreBasico(itemPerdido, itemEncontrado) {
   let scoreTotal = 0;
 
   // 1. Similaridade de texto (título + descrição) — peso 40%
@@ -46,6 +47,26 @@ function calcularScore(itemPerdido, itemEncontrado) {
 }
 
 /**
+ * Calcula o score FINAL combinando IA + básico
+ * Se a IA estiver disponível: 70% IA + 30% básico
+ * Se não: 100% básico (fallback)
+ */
+async function calcularScore(itemPerdido, itemEncontrado) {
+  const scoreBasico = calcularScoreBasico(itemPerdido, itemEncontrado);
+
+  if (iaDisponivel() && scoreBasico >= 10) {
+    const scoreIA = await calcularScoreIA(itemPerdido, itemEncontrado);
+    if (scoreIA !== null) {
+      const scoreFinal = Math.round(scoreIA * 0.7 + scoreBasico * 0.3);
+      console.log(`📊 Score final: ${scoreFinal} (IA: ${scoreIA}, Básico: ${scoreBasico})`);
+      return scoreFinal;
+    }
+  }
+
+  return scoreBasico;
+}
+
+/**
  * Buscar matches para um item perdido
  * Compara com todos os itens encontrados ativos
  */
@@ -70,11 +91,12 @@ async function buscarMatches(itemPerdidoId) {
   });
 
   // Calcular score para cada item encontrado
-  const resultados = itensEncontrados
-    .map(itemEncontrado => ({
-      itemEncontrado,
-      score: calcularScore(itemPerdido, itemEncontrado)
-    }))
+  const resultadosPromises = itensEncontrados.map(async (itemEncontrado) => {
+    const score = await calcularScore(itemPerdido, itemEncontrado);
+    return { itemEncontrado, score };
+  });
+
+  const resultados = (await Promise.all(resultadosPromises))
     .filter(r => r.score >= 15) // Mínimo de 15% de compatibilidade
     .sort((a, b) => b.score - a.score);
 
@@ -129,15 +151,17 @@ async function buscarMatchesParaEncontrado(itemEncontradoId) {
     }
   });
 
-  const resultados = itensPerdidos
-    .map(itemPerdido => ({
-      itemPerdido,
-      score: calcularScore(itemPerdido, itemEncontrado)
-    }))
+  const resultadosPromises = itensPerdidos.map(async (itemPerdido) => {
+    const score = await calcularScore(itemPerdido, itemEncontrado);
+    return { itemPerdido, score };
+  });
+
+  const resultados = (await Promise.all(resultadosPromises))
     .filter(r => r.score >= 15)
     .sort((a, b) => b.score - a.score);
 
   return resultados;
 }
 
-module.exports = { calcularScore, buscarMatches, buscarMatchesParaEncontrado };
+module.exports = { calcularScore, calcularScoreBasico, buscarMatches, buscarMatchesParaEncontrado };
+

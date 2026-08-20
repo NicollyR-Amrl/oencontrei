@@ -16,17 +16,33 @@ const prisma = new PrismaClient();
 const app = express();
 const server = http.createServer(app);
 
+// Configurar origens permitidas (web + app mobile Capacitor)
+const origensPermitidas = [
+  process.env.FRONTEND_URL || 'http://localhost:5173',
+  'capacitor://localhost',  // App Android (Capacitor)
+  'http://localhost',       // Capacitor iOS/Android fallback
+];
+
+function verificarOrigem(origin, callback) {
+  // Permitir requests sem origin (ex: apps mobile, Postman)
+  if (!origin) return callback(null, true);
+  if (origensPermitidas.includes(origin) || process.env.CORS_ALLOW_ALL === 'true') {
+    return callback(null, true);
+  }
+  callback(new Error('Bloqueado pelo CORS'));
+}
+
 // Configurar Socket.io
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: verificarOrigem,
     methods: ['GET', 'POST']
   }
 });
 
 // Middlewares globais
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: verificarOrigem,
   credentials: true
 }));
 app.use(express.json());
@@ -51,6 +67,7 @@ const matchingRotas = require('./rotas/matching.rotas');
 const chatRotas = require('./rotas/chat.rotas');
 const notificacoesRotas = require('./rotas/notificacoes.rotas');
 const adminRotas = require('./rotas/admin.rotas');
+const iaRotas = require('./rotas/ia.rotas');
 
 // Registrar rotas
 app.use('/api/autenticacao', autenticacaoRotas);
@@ -59,6 +76,7 @@ app.use('/api/matching', matchingRotas);
 app.use('/api/chat', chatRotas);
 app.use('/api/notificacoes', notificacoesRotas);
 app.use('/api/admin', adminRotas);
+app.use('/api/ia', iaRotas);
 
 // Configurar Socket.io para chat em tempo real
 const jwt = require('jsonwebtoken');

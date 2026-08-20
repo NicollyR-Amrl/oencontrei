@@ -1,14 +1,15 @@
 // Feature: Matching — Serviço de matching com score de compatibilidade
-// Compara itens perdidos com encontrados e retorna score de compatibilidade
+// Compara itens perdidos com encontrados usando IA (Qwen) + fallback básico
 
 const stringSimilarity = require('string-similarity');
 const prisma = require('../../shared/prisma');
+const { calcularScoreIA, iaDisponivel } = require('./ia.servico');
 
 /**
- * Calcula o score de compatibilidade entre dois itens
+ * Calcula o score BÁSICO de compatibilidade entre dois itens
  * Pesos: texto (40%), categoria (30%), local (30%)
  */
-function calcularScore(itemPerdido, itemEncontrado) {
+function calcularScoreBasico(itemPerdido, itemEncontrado) {
   let scoreTotal = 0;
 
   const textoPerdido = `${itemPerdido.titulo} ${itemPerdido.descricao}`.toLowerCase();
@@ -37,6 +38,27 @@ function calcularScore(itemPerdido, itemEncontrado) {
 }
 
 /**
+ * Calcula o score FINAL combinando IA + básico
+ * Se a IA estiver disponível: 70% IA + 30% básico
+ * Se não: 100% básico (fallback)
+ */
+async function calcularScore(itemPerdido, itemEncontrado) {
+  const scoreBasico = calcularScoreBasico(itemPerdido, itemEncontrado);
+
+  // Só chama a IA se o score básico for >= 10 (evita chamadas desnecessárias)
+  if (iaDisponivel() && scoreBasico >= 10) {
+    const scoreIA = await calcularScoreIA(itemPerdido, itemEncontrado);
+    if (scoreIA !== null) {
+      const scoreFinal = Math.round(scoreIA * 0.7 + scoreBasico * 0.3);
+      console.log(`📊 Score final: ${scoreFinal} (IA: ${scoreIA}, Básico: ${scoreBasico})`);
+      return scoreFinal;
+    }
+  }
+
+  return scoreBasico;
+}
+
+/**
  * Buscar matches para um item perdido
  */
 async function buscarMatches(itemPerdidoId) {
@@ -51,8 +73,13 @@ async function buscarMatches(itemPerdidoId) {
     include: { usuario: { select: { id: true, nome: true, avatar: true } } }
   });
 
-  const resultados = itensEncontrados
-    .map(itemEncontrado => ({ itemEncontrado, score: calcularScore(itemPerdido, itemEncontrado) }))
+  // Calcular scores (com IA quando disponível)
+  const resultadosPromises = itensEncontrados.map(async (itemEncontrado) => {
+    const score = await calcularScore(itemPerdido, itemEncontrado);
+    return { itemEncontrado, score };
+  });
+
+  const resultados = (await Promise.all(resultadosPromises))
     .filter(r => r.score >= 15)
     .sort((a, b) => b.score - a.score);
 
@@ -88,12 +115,18 @@ async function buscarMatchesParaEncontrado(itemEncontradoId) {
     include: { usuario: { select: { id: true, nome: true, avatar: true } } }
   });
 
-  const resultados = itensPerdidos
-    .map(itemPerdido => ({ itemPerdido, score: calcularScore(itemPerdido, itemEncontrado) }))
+  // Calcular scores (com IA quando disponível)
+  const resultadosPromises = itensPerdidos.map(async (itemPerdido) => {
+    const score = await calcularScore(itemPerdido, itemEncontrado);
+    return { itemPerdido, score };
+  });
+
+  const resultados = (await Promise.all(resultadosPromises))
     .filter(r => r.score >= 15)
     .sort((a, b) => b.score - a.score);
 
   return resultados;
 }
 
-module.exports = { calcularScore, buscarMatches, buscarMatchesParaEncontrado };
+module.exports = { calcularScore, calcularScoreBasico, buscarMatches, buscarMatchesParaEncontrado };
+

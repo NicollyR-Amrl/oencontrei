@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Upload, MapPin, Tag, FileText, Image as ImageIcon, Calendar, X, Loader2, Sparkles, AlertCircle } from 'lucide-react';
+import api from '../servicos/api';
 
 const CATEGORIAS = [
   { valor: 'ELETRONICO', label: 'Eletrônico', emoji: '📱' },
@@ -28,6 +29,37 @@ export default function FormularioItem({ tipo, onSubmit, carregando, initialData
   const [previewImagem, setPreviewImagem] = useState(initialData?.imagem || null);
   const [isDragging, setIsDragging] = useState(false);
   const [erroLocal, setErroLocal] = useState('');
+  const [carregandoIA, setCarregandoIA] = useState(false);
+  const [mensagemIA, setMensagemIA] = useState('');
+
+  const handleGerarIA = async () => {
+    if (!formulario.titulo || formulario.titulo.trim().length < 3) {
+      setErroLocal('Preencha o Título (ex: garrafa azul) para que a IA possa classificar e detalhar seu item.');
+      return;
+    }
+    setCarregandoIA(true);
+    setErroLocal('');
+    try {
+      const res = await api.post('/ia/sugerir-categoria', {
+        titulo: formulario.titulo,
+        descricao: formulario.descricao
+      });
+      if (res.data.sucesso) {
+        setFormulario(prev => ({
+          ...prev,
+          categoria: res.data.categoria || prev.categoria,
+          descricao: res.data.descricaoAprimorada || prev.descricao
+        }));
+        setMensagemIA('✨ Categoria e descrição aprimoradas com sucesso pela IA Qwen!');
+        setTimeout(() => setMensagemIA(''), 4000);
+      }
+    } catch (err) {
+      console.error('Erro ao chamar IA:', err);
+      setErroLocal('Não foi possível conectar com a IA no momento.');
+    } finally {
+      setCarregandoIA(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormulario(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -174,9 +206,20 @@ export default function FormularioItem({ tipo, onSubmit, carregando, initialData
 
       {/* Título */}
       <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
-          <FileText size={18} className="text-primary-500" /> Título da Publicação
-        </label>
+        <div className="flex justify-between items-center mb-2">
+          <label className="block text-sm font-semibold text-slate-700 flex items-center gap-2">
+            <FileText size={18} className="text-primary-500" /> Título da Publicação
+          </label>
+          <button
+            type="button"
+            onClick={handleGerarIA}
+            disabled={carregandoIA}
+            className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-xs font-bold rounded-lg transition-all shadow-sm hover:scale-[1.02] disabled:opacity-50"
+          >
+            {carregandoIA ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+            <span>{carregandoIA ? 'Analisando...' : '✨ Preencher / Melhorar com IA'}</span>
+          </button>
+        </div>
         <input
           type="text"
           name="titulo"
@@ -186,6 +229,11 @@ export default function FormularioItem({ tipo, onSubmit, carregando, initialData
           className="input-field"
           required
         />
+        {mensagemIA && (
+          <p className="mt-1.5 text-xs font-semibold text-emerald-600 flex items-center gap-1 animate-fade-in">
+            {mensagemIA}
+          </p>
+        )}
       </div>
 
       {/* Categorias Interativas */}

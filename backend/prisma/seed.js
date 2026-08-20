@@ -6,12 +6,11 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Iniciando seed...');
 
-  // Limpar banco
-  await prisma.notificacao.deleteMany();
-  await prisma.mensagem.deleteMany();
-  await prisma.match.deleteMany();
-  await prisma.item.deleteMany();
-  await prisma.usuario.deleteMany();
+  const count = await prisma.usuario.count();
+  if (count > 0) {
+    console.log('Banco de dados já contém usuários. Ignorando seed.');
+    return;
+  }
 
   const senhaHash = await bcrypt.hash('123456', 10);
 

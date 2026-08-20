@@ -26,3 +26,6 @@ backend/uploads/
 temp_extract/
 backup_stub/
 oencontrei_backup_stub/
+*.db
+login.json
+

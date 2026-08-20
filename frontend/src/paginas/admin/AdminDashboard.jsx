@@ -1,24 +1,41 @@
 import { useState, useEffect } from 'react';
-import { Users, Package, Handshake, Check, AlertCircle } from 'lucide-react';
+import { Users, Package, Handshake, Check, AlertCircle, Sparkles, Bot, Loader2, RefreshCw } from 'lucide-react';
 import api from '../../servicos/api';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [carregando, setCarregando] = useState(true);
+  const [relatorioIA, setRelatorioIA] = useState('');
+  const [carregandoIA, setCarregandoIA] = useState(false);
 
   useEffect(() => {
-    const carregarStats = async () => {
-      try {
-        const res = await api.get('/admin/estatisticas');
-        setStats(res.data.estatisticas);
-      } catch (err) {
-        console.error('Erro ao carregar estatísticas:', err);
-      } finally {
-        setCarregando(false);
-      }
-    };
     carregarStats();
   }, []);
+
+  const carregarStats = async () => {
+    try {
+      const res = await api.get('/admin/estatisticas');
+      setStats(res.data.estatisticas);
+    } catch (err) {
+      console.error('Erro ao carregar estatísticas:', err);
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const gerarRelatorioIA = async () => {
+    setCarregandoIA(true);
+    try {
+      const res = await api.get('/ia/resumo-admin');
+      if (res.data.sucesso) {
+        setRelatorioIA(res.data.relatorio);
+      }
+    } catch (err) {
+      console.error('Erro ao gerar relatório com IA:', err);
+    } finally {
+      setCarregandoIA(false);
+    }
+  };
 
   if (carregando) return (
     <div className="flex justify-center py-20">
@@ -28,7 +45,6 @@ export default function AdminDashboard() {
 
   if (!stats) return null;
 
-  // Adaptando os cards para exibir exatamente as métricas exigidas nos requisitos
   const cards = [
     { label: 'Itens Encontrados', valor: stats.itensEncontrados || 0, icone: Package, corBg: 'bg-acento-500/10', corIcone: 'text-acento-600' },
     { label: 'Itens Perdidos', valor: stats.itensPerdidos || 0, icone: Package, corBg: 'bg-perigo-500/10', corIcone: 'text-perigo-500' },
@@ -39,8 +55,9 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="animate-fade-in">
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-8">
+    <div className="animate-fade-in space-y-6">
+      {/* Cards de Métricas */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         {cards.map((s) => (
           <div key={s.label} className="card text-center flex flex-col items-center justify-center p-4 sm:p-6">
             <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl mb-3 sm:mb-4 flex items-center justify-center ${s.corBg}`}>
@@ -50,6 +67,45 @@ export default function AdminDashboard() {
             <p className="text-[10px] sm:text-xs font-semibold text-texto-secundario uppercase tracking-wider">{s.label}</p>
           </div>
         ))}
+      </div>
+
+      {/* Painel de IA Qwen */}
+      <div className="bg-gradient-to-br from-violet-900 via-indigo-900 to-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-xl border border-violet-700/30">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-violet-600/30 border border-violet-400/30 flex items-center justify-center text-amber-300">
+              <Bot size={28} />
+            </div>
+            <div>
+              <h3 className="text-xl font-extrabold flex items-center gap-2">
+                Diagnóstico & Relatório Executivo de IA
+                <span className="bg-violet-500/30 text-amber-300 border border-amber-300/30 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Sparkles size={10} /> Nemotron 3.5
+                </span>
+              </h3>
+              <p className="text-violet-200 text-xs font-medium">Análise em tempo real de eficiência, devoluções e sugestões para a direção escolar.</p>
+            </div>
+          </div>
+
+          <button
+            onClick={gerarRelatorioIA}
+            disabled={carregandoIA}
+            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] disabled:opacity-50"
+          >
+            {carregandoIA ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+            <span>{carregandoIA ? 'Gerando Relatório...' : 'Gerar Relatório com IA'}</span>
+          </button>
+        </div>
+
+        {relatorioIA ? (
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/10 text-violet-100 text-sm whitespace-pre-line leading-relaxed">
+            {relatorioIA}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-violet-300/70 border border-dashed border-violet-500/30 rounded-xl bg-white/5 text-xs">
+            Clique no botão acima para gerar um relatório inteligente completo com diagnóstico da escola.
+          </div>
+        )}
       </div>
     </div>
   );
