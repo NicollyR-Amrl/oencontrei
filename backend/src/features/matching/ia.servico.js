@@ -324,6 +324,36 @@ Diretrizes:
 }
 
 /**
+ * Remove caracteres especiais e tags markdown indesejadas
+ */
+function limparTextoRelatorio(texto) {
+  if (!texto) return '';
+  return texto
+    // Remove títulos markdown #, ##, ###
+    .replace(/^#{1,6}\s*/gm, '')
+    // Remove separadores horizontais markdown --- ou ***
+    .replace(/^[-*_]{3,}\s*$/gm, '')
+    // Remove linhas de tabelas markdown | ... |
+    .replace(/^[|].*[|]$/gm, (line) => {
+      if (/^[|:\s-]+$/.test(line)) return '';
+      const cells = line.split('|').map(c => c.trim()).filter(Boolean);
+      return cells.length > 0 ? `• ${cells.join(' — ')}` : '';
+    })
+    // Remove negrito e itálico markdown (** ou * ou __ ou _)
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/__(.*?)__/g, '$1')
+    .replace(/_(.*?)_/g, '$1')
+    // Remove crases markdown `texto`
+    .replace(/`{1,3}(.*?)`{1,3}/g, '$1')
+    // Converte marcadores soltos de lista para bullet point limpo
+    .replace(/^\s*[\*\-]\s+/gm, '• ')
+    // Remove múltiplos espaços e linhas vazias excessivas
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+/**
  * 4. Relatório e Diagnóstico Executivo para o Administrador
  */
 async function gerarRelatorioAdmin() {
@@ -333,35 +363,65 @@ async function gerarRelatorioAdmin() {
     const encontrados = await prisma.item.count({ where: { tipo: 'ENCONTRADO' } });
     const devolvidos = await prisma.item.count({ where: { status: 'DEVOLVIDO' } });
     const totalMatches = await prisma.match.count();
+    const taxaDevolucao = totalItens > 0 ? Math.round((devolvidos / totalItens) * 100) : 0;
 
-    const dados = `
+    const prompt = `Você é um consultor analista de gestão escolar da plataforma O Encontrei!.
+Analise os dados estatísticos abaixo e gere um relatório executivo claro, direto, elegante e agradável de ler em português.
+
+DIRETRIZES DE FORMATAÇÃO (MUITO IMPORTANTE):
+- Escreva em texto limpo e direto.
+- NÃO use caracteres markdown como '#', '##', '###' ou '---'.
+- NÃO use asteriscos '**' ou '*' para negrito/itálico.
+- NÃO crie tabelas com barras verticais (|).
+- Use títulos em texto normal com emojis e tópicos com bullet point simples (• ).
+- Seja conciso e profissional.
+
+Estruture exatamente com estas seções:
+
+📊 DIAGNÓSTICO GERAL DA ESCOLA
+(Escreva 1 a 2 parágrafos resumindo a situação dos achados e perdidos)
+
+💡 EFICIÊNCIA E DESTAQUES
+• Ponto sobre taxa de devolução e resolução de casos
+• Ponto sobre engajamento de alunos e colaboradores
+
+🚀 RECOMENDAÇÕES DA IA PARA A GESTÃO ESCOLAR
+• Recomendação prática para aumentar devoluções
+• Recomendação para campanhas de conscientização na escola
+
+Dados da plataforma:
 - Total de Itens Registrados: ${totalItens}
 - Itens Perdidos: ${perdidos}
 - Itens Encontrados: ${encontrados}
 - Itens Devolvidos com Sucesso: ${devolvidos}
-- Taxa de Devolução: ${totalItens > 0 ? Math.round((devolvidos / totalItens) * 100) : 0}%
-- Total de Correspondências (Matches) Geradas: ${totalMatches}
-    `;
-
-    const prompt = `Analise os dados da plataforma de achados e perdidos da escola e gere um relatório executivo curto (em markdown) com 3 tópicos:
-1. 📊 Diagnóstico Geral da Escola
-2. 💡 Destaques & Eficiência
-3. 🚀 Recomendações da IA para a gestão escolar
-
-Dados:
-${dados}`;
+- Taxa de Devolução: ${taxaDevolucao}%
+- Total de Correspondências (Matches): ${totalMatches}`;
 
     const resposta = await chamarQwen(
       prompt,
-      'Você é um consultor analista de dados especialista em gestão escolar. Responda em markdown elegante e bem estruturado.',
-      500,
-      0.3
+      'Você é um consultor analista de dados especialista em gestão escolar. Responda em texto limpo, elegante e sem caracteres especiais markdown.',
+      700,
+      0.2
     );
 
-    return resposta || 'Serviço de relatórios indisponível no momento.';
+    if (resposta) {
+      return limparTextoRelatorio(resposta);
+    }
+
+    // Fallback limpo local
+    return `📊 DIAGNÓSTICO GERAL DA ESCOLA
+A plataforma conta atualmente com ${totalItens} item(ns) registrado(s), sendo ${encontrados} encontrado(s) e ${perdidos} perdido(s). A taxa de devolução atual é de ${taxaDevolucao}%.
+
+💡 EFICIÊNCIA E DESTAQUES
+• Total de ${devolvidos} item(ns) devolvido(s) com sucesso ao proprietário.
+• Foram geradas ${totalMatches} correspondência(s) automática(s) de compatibilidade pelo sistema.
+
+🚀 RECOMENDAÇÕES DA IA PARA A GESTÃO ESCOLAR
+• Incentivar alunos e funcionários a cadastrarem itens com fotos e locais detalhados para melhorar as chances de devolução.
+• Realizar avisos periódicos nas salas de aula sobre os objetos guardados na secretaria.`;
   } catch (err) {
     console.error('Erro ao gerar relatório admin:', err.message);
-    return 'Erro ao compilar dados estatísticos para o relatório.';
+    return 'Erro ao compilar dados estatísticos para o relatório no momento.';
   }
 }
 

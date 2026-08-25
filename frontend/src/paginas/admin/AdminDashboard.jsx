@@ -98,8 +98,38 @@ export default function AdminDashboard() {
         </div>
 
         {relatorioIA ? (
-          <div className="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/10 text-violet-100 text-sm whitespace-pre-line leading-relaxed">
-            {relatorioIA}
+          <div className="bg-slate-900/60 backdrop-blur-md rounded-xl p-6 border border-violet-500/20 text-slate-100 text-sm space-y-4 leading-relaxed font-sans shadow-inner">
+            {relatorioIA.split('\n\n').map((bloco, idx) => {
+              const linhas = bloco.trim().split('\n');
+              const ehTitulo = linhas[0] && (linhas[0].includes('DIAGNÓSTICO') || linhas[0].includes('EFICIÊNCIA') || linhas[0].includes('RECOMENDAÇÕES') || linhas[0].startsWith('📊') || linhas[0].startsWith('💡') || linhas[0].startsWith('🚀'));
+              
+              if (ehTitulo && linhas.length > 1) {
+                return (
+                  <div key={idx} className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-2">
+                    <h4 className="font-bold text-amber-300 text-sm flex items-center gap-2">
+                      {linhas[0]}
+                    </h4>
+                    <div className="text-violet-100 text-xs sm:text-sm space-y-1.5 pl-1">
+                      {linhas.slice(1).map((linha, lIdx) => (
+                        <p key={lIdx} className={linha.startsWith('•') ? 'flex items-start gap-2 text-violet-200' : ''}>
+                          {linha}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <div key={idx} className="space-y-1.5">
+                  {linhas.map((linha, lIdx) => (
+                    <p key={lIdx} className={linha.startsWith('•') ? 'flex items-start gap-2 text-violet-200 pl-2' : ehTitulo ? 'font-bold text-amber-300 text-sm' : 'text-violet-100'}>
+                      {linha}
+                    </p>
+                  ))}
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-8 text-violet-300/70 border border-dashed border-violet-500/30 rounded-xl bg-white/5 text-xs">
