@@ -50,7 +50,7 @@ export default function FormularioItem({ tipo, onSubmit, carregando, initialData
           categoria: res.data.categoria || prev.categoria,
           descricao: res.data.descricaoAprimorada || prev.descricao
         }));
-        setMensagemIA('✨ Categoria e descrição aprimoradas com sucesso pela IA Qwen!');
+        setMensagemIA('✨ Categoria e descrição aprimoradas com sucesso pela IA!');
         setTimeout(() => setMensagemIA(''), 4000);
       }
     } catch (err) {
